@@ -26,6 +26,9 @@ importers:
       '@deepseek-ai/dsh-brand':
         specifier: link:../../../kongming-os/third_party/dsh/packages/util/brand
         version: link:../../../kongming-os/third_party/dsh/packages/util/brand
+      '@deepseek-ai/dsh-client-connection':
+        specifier: link:../../../kongming-os/third_party/dsh/packages/client/connection
+        version: link:../../../kongming-os/third_party/dsh/packages/client/connection
       '@deepseek-ai/dsh-client-locale':
         specifier: link:../../../kongming-os/third_party/dsh/packages/client/locale
         version: link:../../../kongming-os/third_party/dsh/packages/client/locale
