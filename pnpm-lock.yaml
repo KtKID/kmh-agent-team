@@ -47,6 +47,12 @@ importers:
       '@deepseek-ai/dsh-client-ui-workspace':
         specifier: link:../../../kongming-os/third_party/dsh/packages/client/ui-workspace
         version: link:../../../kongming-os/third_party/dsh/packages/client/ui-workspace
+      '@deepseek-ai/dsh-commands':
+        specifier: link:../../../kongming-os/third_party/dsh/packages/interaction/commands
+        version: link:../../../kongming-os/third_party/dsh/packages/interaction/commands
+      '@deepseek-ai/dsh-compaction':
+        specifier: link:../../../kongming-os/third_party/dsh/packages/compaction/compaction
+        version: link:../../../kongming-os/third_party/dsh/packages/compaction/compaction
       '@deepseek-ai/dsh-home-paths':
         specifier: link:../../../kongming-os/third_party/dsh/packages/util/home-paths
         version: link:../../../kongming-os/third_party/dsh/packages/util/home-paths

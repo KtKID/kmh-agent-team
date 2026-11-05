@@ -8,6 +8,12 @@ import type {} from "@deepseek-ai/dsh-workspace";
 import type {} from "@deepseek-ai/dsh-api-session-controller";
 import { AgentStore } from "./registry.ts";
 import { mountAgentPrompt } from "./prompt.ts";
+import {
+  createAgentMemory,
+  resolveMemoryFiles,
+  type AgentMemory,
+  type MemoryConfig,
+} from "./memory/index.ts";
 import type {
   AgentCreated,
   AgentModel,
@@ -24,6 +30,8 @@ export class JunjiRuntime {
   private readonly records = new Map<string, AgentRecord>();
   private readonly prompts = new Map<string, () => void>();
   private readonly liveAgents = new Map<string, Agent>();
+  private readonly memories = new Map<string, AgentMemory>();
+  private readonly memoryReleases = new Map<string, () => Promise<void>>();
   private canonicalRoot: string | undefined;
   private workspace: Workspace | undefined;
   private closed = false;
@@ -33,11 +41,13 @@ export class JunjiRuntime {
    * @param ctx - 插件生命周期上下文。
    * @param store - agent 档案存储。
    * @param root - 军机阁根目录（`<dsh-home>/agent-team`）。
+   * @param memoryConfig - 记忆模板配置。
    */
   constructor(
     readonly ctx: Context,
     readonly store: AgentStore,
     readonly root: string,
+    private readonly memoryConfig: MemoryConfig,
   ) {
     ctx.on("agent/created", ({ agent }) => {
       if (this.closed) return;
@@ -137,6 +147,13 @@ export class JunjiRuntime {
     this.requireOpen();
     const record = this.requireRecord(id);
     this.releasePrompt(SessionId(record.sessionId));
+    const memory = this.memories.get(record.sessionId);
+    if (memory !== undefined) {
+      this.memories.delete(record.sessionId);
+      await memory.close().catch(() => {
+        /* 删除路径上的收敛失败不阻塞目录移除，文件随目录一并删除。 */
+      });
+    }
     await this.store.remove(id);
     this.records.delete(id);
   }
@@ -232,15 +249,41 @@ export class JunjiRuntime {
         record.sessionId,
         mountAgentPrompt(agent, record.systemPrompt),
       );
+    void this.bindMemory(record, agent);
   }
 
-  /** 释放某会话的提示词段与存活引用；未绑定时无操作。 */
+  /** 记忆绑定：创建或复用该 agent 的记忆服务，初始化文件（创建时加载）并挂全部监听。 */
+  private async bindMemory(
+    record: AgentRecord,
+    agent: Agent,
+  ): Promise<void> {
+    if (this.memoryReleases.has(record.sessionId)) return;
+    let memory = this.memories.get(record.sessionId);
+    if (memory === undefined) {
+      memory = createAgentMemory(
+        this.ctx,
+        resolveMemoryFiles(this.store.dir(record.id)),
+        this.memoryConfig,
+      );
+      this.memories.set(record.sessionId, memory);
+    }
+    const release = await memory.bindAgent(agent);
+    this.memoryReleases.set(record.sessionId, release);
+    await memory.initialize();
+  }
+
+  /** 释放某会话的提示词段、记忆绑定与存活引用；记忆服务保留供重新绑定。 */
   private releasePrompt(sessionId: SessionId): void {
     const release = this.prompts.get(sessionId);
     if (release === undefined) return;
     this.prompts.delete(sessionId);
     this.liveAgents.delete(sessionId);
     release();
+    const releaseMemory = this.memoryReleases.get(sessionId);
+    if (releaseMemory !== undefined) {
+      this.memoryReleases.delete(sessionId);
+      void releaseMemory();
+    }
   }
 
   private requireRecord(id: string): AgentRecord {
@@ -268,5 +311,10 @@ export class JunjiRuntime {
       });
       this.releasePrompt(SessionId(sessionId));
     }
+    for (const memory of this.memories.values())
+      await memory.close().catch(() => {
+        /* 收敛失败不阻塞卸载，文件工作已尽力完成。 */
+      });
+    this.memories.clear();
   }
 }
