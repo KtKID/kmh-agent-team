@@ -1,0 +1,92 @@
+{
+  "name": "@kmh/kmh-junji",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "军机阁：用户自建 agent 团队（每个 agent 一对一专属会话 + 独立记忆小本子）",
+  "license": "MIT",
+  "files": [
+    "lib/src",
+    "lib/client.js",
+    "README.md",
+    "lib/browser-types/**/*.d.ts"
+  ],
+  "exports": {
+    ".": {
+      "types": "./lib/src/index.d.ts",
+      "default": "./lib/src/index.js"
+    },
+    "./package.json": "./package.json",
+    "./client": {
+      "types": "./lib/browser-types/src/client/index.d.ts",
+      "default": "./lib/client.js"
+    },
+    "./protocol": {
+      "types": "./lib/src/protocol/index.d.ts",
+      "default": "./lib/src/protocol/index.js"
+    }
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "pretest": "pnpm build",
+    "test": "node --test --test-concurrency=1 test/*.test.mjs",
+    "typecheck": "tsc -p tsconfig.host.json --noEmit && tsc -p tsconfig.browser.json --noEmit",
+    "lint": "eslint src --max-warnings 0",
+    "format:check": "prettier src tsconfig*.json package.json --check"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "4.0.6-alpha.1",
+    "@deepseek-ai/schemastery": "3.18.6-alpha.1",
+    "@deepseek-ai/dsh-agent": "0.2.2-alpha.2",
+    "@deepseek-ai/dsh-session": "0.2.2-alpha.2",
+    "@deepseek-ai/dsh-home-paths": "0.2.2-alpha.2",
+    "@deepseek-ai/dsh-system-prompt": "0.2.2-alpha.2",
+    "@deepseek-ai/dsh-workspace": "0.2.2-alpha.2",
+    "@deepseek-ai/dsh-api-session-controller": "0.2.2-alpha.2",
+    "@deepseek-ai/dsh-llm": "0.2.2-alpha.2",
+    "@deepseek-ai/dsh-client-ui-slots": "0.2.2-alpha.2",
+    "@deepseek-ai/dsh-client-ui-workspace": "0.2.2-alpha.2",
+    "@deepseek-ai/dsh-client-locale": "0.2.2-alpha.2",
+    "@deepseek-ai/dsh-client-ui-primitives": "0.2.2-alpha.2",
+    "@deepseek-ai/dsh-client-ui-session": "0.2.2-alpha.2",
+    "@deepseek-ai/dsh-client-store": "0.2.2-alpha.2",
+    "@deepseek-ai/dsh-brand": "0.2.2-alpha.2",
+    "react": "^18.3.1"
+  },
+  "dependencies": {
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@deepseek-ai/schemastery": "link:../../../kongming-os/third_party/dsh/vendor/schemastery",
+    "@deepseek-ai/dsh-agent": "link:../../../kongming-os/third_party/dsh/packages/core/agent",
+    "@deepseek-ai/dsh-session": "link:../../../kongming-os/third_party/dsh/packages/core/session",
+    "@deepseek-ai/dsh-home-paths": "link:../../../kongming-os/third_party/dsh/packages/util/home-paths",
+    "@deepseek-ai/dsh-system-prompt": "link:../../../kongming-os/third_party/dsh/packages/core/system-prompt",
+    "@deepseek-ai/dsh-workspace": "link:../../../kongming-os/third_party/dsh/packages/workspace/workspace",
+    "@deepseek-ai/dsh-api-session-controller": "link:../../../kongming-os/third_party/dsh/packages/api/session-controller",
+    "@deepseek-ai/dsh-llm": "link:../../../kongming-os/third_party/dsh/packages/llm/llm",
+    "@deepseek-ai/dsh-client-ui-slots": "link:../../../kongming-os/third_party/dsh/packages/client/ui-slots",
+    "@deepseek-ai/dsh-client-ui-workspace": "link:../../../kongming-os/third_party/dsh/packages/client/ui-workspace",
+    "@deepseek-ai/dsh-client-locale": "link:../../../kongming-os/third_party/dsh/packages/client/locale",
+    "@deepseek-ai/dsh-client-ui-primitives": "link:../../../kongming-os/third_party/dsh/packages/client/ui-primitives",
+    "@deepseek-ai/dsh-client-ui-session": "link:../../../kongming-os/third_party/dsh/packages/client/ui-session",
+    "@deepseek-ai/dsh-client-store": "link:../../../kongming-os/third_party/dsh/packages/client/store",
+    "@deepseek-ai/dsh-brand": "link:../../../kongming-os/third_party/dsh/packages/util/brand",
+    "esbuild": "^0.28.1",
+    "typescript": "^6.0.3",
+    "@types/node": "^22.20.0",
+    "react": "^18.3.1",
+    "@types/react": "^18.3.31"
+  },
+  "dsh": {
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-slots",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-workspace",
+        "@deepseek-ai/dsh-client-ui-primitives",
+        "@deepseek-ai/dsh-client-ui-session"
+      ],
+      "platform": "web"
+    }
+  }
+}
