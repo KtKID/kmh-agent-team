@@ -35,12 +35,21 @@ importers:
       '@deepseek-ai/dsh-client-store':
         specifier: link:../../../kongming-os/third_party/dsh/packages/client/store
         version: link:../../../kongming-os/third_party/dsh/packages/client/store
+      '@deepseek-ai/dsh-client-ui-layout':
+        specifier: link:../../../kongming-os/third_party/dsh/packages/client/ui-layout
+        version: link:../../../kongming-os/third_party/dsh/packages/client/ui-layout
       '@deepseek-ai/dsh-client-ui-primitives':
         specifier: link:../../../kongming-os/third_party/dsh/packages/client/ui-primitives
         version: link:../../../kongming-os/third_party/dsh/packages/client/ui-primitives
+      '@deepseek-ai/dsh-client-ui-renderer':
+        specifier: link:../../../kongming-os/third_party/dsh/packages/client/ui-renderer
+        version: link:../../../kongming-os/third_party/dsh/packages/client/ui-renderer
       '@deepseek-ai/dsh-client-ui-session':
         specifier: link:../../../kongming-os/third_party/dsh/packages/client/ui-session
         version: link:../../../kongming-os/third_party/dsh/packages/client/ui-session
+      '@deepseek-ai/dsh-client-ui-sidebar':
+        specifier: link:../../../kongming-os/third_party/dsh/packages/client/ui-sidebar
+        version: link:../../../kongming-os/third_party/dsh/packages/client/ui-sidebar
       '@deepseek-ai/dsh-client-ui-slots':
         specifier: link:../../../kongming-os/third_party/dsh/packages/client/ui-slots
         version: link:../../../kongming-os/third_party/dsh/packages/client/ui-slots
