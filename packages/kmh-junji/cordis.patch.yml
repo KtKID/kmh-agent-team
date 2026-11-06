@@ -1,0 +1,4 @@
+# 军机阁插件独立安装时的实例登记；记忆模板与提醒文案默认值由插件 Schema 提供。
+- insert:
+    - id: kmh-junji
+      name: "@kmh/kmh-junji"

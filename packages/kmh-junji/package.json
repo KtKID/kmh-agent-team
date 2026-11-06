@@ -8,7 +8,8 @@
     "lib/src",
     "lib/client.js",
     "README.md",
-    "lib/browser-types/**/*.d.ts"
+    "lib/browser-types/**/*.d.ts",
+    "cordis.patch.yml"
   ],
   "exports": {
     ".": {
@@ -102,6 +103,9 @@
         "@deepseek-ai/dsh-client-ui-renderer"
       ],
       "platform": "web"
+    },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
     }
   }
 }
