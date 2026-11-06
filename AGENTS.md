@@ -27,5 +27,6 @@
 - [x] Phase 0-4 开发完成（2026-11-06）：底座 / host 注册表与会话绑定 / per-agent 记忆 / 军机阁主面板与侧栏启动行 / bundle 注册（`dsh.bundle.patch`）。
 - [x] 弹窗改用宿主 Modal 原语与真实主题 token（`9805303`），修复透明背景。
 - [x] 隔离环境 E2E 全链路通过（创建/绑定/真实对话/记忆/压缩刷新/重启恢复/双 agent 隔离），见 [docs/verification-20261106.md](docs/verification-20261106.md)。
-- [ ] 待用户：重载 60000 后目检弹窗视觉（client bundle 进启动时 VFS 包，需服务重载，浏览器刷新不换包）。
+- [x] 浏览器级验证（裸 CDP 对 60090）：侧栏入口/面板/弹窗 computed style（卡面 rgb(44,44,46) 不透明、遮罩 rgba(0,0,0,0.5)）/点击进专属会话，全部通过。
+- [ ] 待用户（运维项，非开发项）：重载 60000 使其 VFS 包换到含 Modal 修复的 bundle；60090 可先目检。
 - 集成事实：kongming-os `profiles/kmh-web` 已链接本包（dependency + bundle），60090 测试实例可直接目检新版。

@@ -29,6 +29,21 @@
 - **弹窗背景修复**（Modal 原语 + 真实主题 token）：bundle 回归通过（旧 token 0 残留）；60090 实例已载新版待目检；60000 需重载后生效（client bundle 打进启动时 VFS 包，浏览器刷新不换包）
 - **浏览器自动化**：本机无独立系统 Chromium、现存 profile 挂载需本会话不可得的 launch grant，未能自动化；以 API 级真实链路 + 用户实测替代
 
+## 浏览器级补充验证（同日，裸 CDP 驱动自建 Chrome 对 60090）
+
+| 检查 | 结果 | computed style 证据 |
+|---|---|---|
+| 侧栏"军机阁"入口 | ✅ | DOM 按钮存在并可点击 |
+| 军机阁面板 | ✅ | `[data-junji-panel]` 挂载 |
+| **弹窗卡面背景（本次修复点）** | ✅ | `rgb(44, 44, 46)`（bg-layer-2 暗色解析值，非 rgba(0,0,0,0)）；阴影 + 28px 圆角 + z-index 1000 |
+| 弹窗遮罩 | ✅ | `.mask::after` 背景 `rgba(0, 0, 0, 0.5)` |
+| 表单字段主题 | ✅ | 输入框 `rgb(35,35,36)` 底 + `rgba(255,255,255,0.2)` 边框（bg-layer-1 / border-l4） |
+| 创建表单完整 | ✅ | 标题"创建大臣"、名字/系统提示词 textarea/模型 select 齐备 |
+| **点击 agent → 专属会话** | ✅ | 点击列表行后面板关闭、输入框（composer）出现，即 uiWorkspace.openSession 导航生效 |
+| 面板列表 | ✅ | 三行命名 agent（两个"司马懿"为同名不同 id，slug 已去重）+ 图标按钮 |
+
+截图存档：`/tmp/junji-e2e/after-click.png`（点击 agent 进入会话后的页面）。
+
 ## 复验入口
 
 ```sh
