@@ -44,10 +44,10 @@ const fieldStyle = {
   width: "100%",
   boxSizing: "border-box",
   padding: "6px 10px",
-  borderRadius: 8,
-  border: "1px solid var(--dsw-alias-separator)",
-  background: "var(--dsw-alias-fill-input)",
-  color: "inherit",
+  borderRadius: "var(--dsw-radius-md)",
+  border: "0.5px solid var(--dsw-alias-border-l4)",
+  background: "var(--dsw-alias-bg-layer-1)",
+  color: "var(--dsw-alias-label-primary)",
   fontSize: 13,
 } as const;
 
@@ -114,6 +114,7 @@ export function AgentForm({
         </label>
         <input
           id="junji-agent-name"
+          className="junji-field"
           style={fieldStyle}
           value={name}
           placeholder={t("namePlaceholder")}
@@ -128,6 +129,7 @@ export function AgentForm({
         </label>
         <textarea
           id="junji-agent-prompt"
+          className="junji-field"
           style={{ ...fieldStyle, minHeight: 120, resize: "vertical" }}
           value={systemPrompt}
           placeholder={t("systemPromptPlaceholder")}
@@ -136,12 +138,14 @@ export function AgentForm({
           }}
         />
       </div>
+      <style>{`.junji-field:focus{border-color:var(--dsw-alias-state-business-primary);outline:none}.junji-field::placeholder{color:var(--dsw-alias-label-dimmed)}`}</style>
       <div>
         <label style={labelStyle} htmlFor="junji-agent-model">
           {t("model")}
         </label>
         <select
           id="junji-agent-model"
+          className="junji-field"
           style={fieldStyle}
           value={selection}
           onChange={(event) => {
@@ -173,7 +177,7 @@ export function AgentForm({
         </select>
       </div>
       {error === undefined ? null : (
-        <div role="alert" style={{ fontSize: 12, color: "var(--dsw-alias-label-danger, #d5484f)" }}>
+        <div role="alert" style={{ fontSize: 12, color: "var(--dsw-alias-state-error-primary)" }}>
           {error}
         </div>
       )}

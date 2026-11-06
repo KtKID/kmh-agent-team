@@ -7,6 +7,7 @@ import {
   IconPlusOutlineRegular,
   IconTrashOutlineMedium,
   IconUsersOutlineRegular,
+  Modal,
 } from "@deepseek-ai/dsh-client-ui-primitives";
 import type {
   InjectFace,
@@ -170,7 +171,7 @@ export function JunjiPanel({ open, t }: PanelProps): ReactNode {
       {error === undefined ? null : (
         <div
           role="alert"
-          style={{ padding: "0 16px", fontSize: 12, color: "var(--dsw-alias-label-danger, #d5484f)" }}
+          style={{ padding: "0 16px", fontSize: 12, color: "var(--dsw-alias-state-error-primary)" }}
         >
           {error}
         </div>
@@ -294,50 +295,27 @@ export function JunjiPanel({ open, t }: PanelProps): ReactNode {
         </ul>
       )}
       {overlay.kind === "closed" || catalog === undefined ? null : (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "color-mix(in srgb, var(--dsw-alias-fill-deep, rgba(0,0,0,0.5)) 50%, transparent)",
-            zIndex: 40,
+        <Modal
+          open
+          onClose={() => {
+            setOverlay({ kind: "closed" });
           }}
-          onClick={(event) => {
-            if (event.target === event.currentTarget)
-              setOverlay({ kind: "closed" });
-          }}
+          title={overlay.kind === "editing" ? t("editTitle") : t("createTitle")}
+          closeLabel={t("cancel")}
         >
-          <div
-            role="dialog"
-            aria-modal="true"
-            style={{
-              width: "min(440px, calc(100vw - 48px))",
-              maxHeight: "calc(100vh - 96px)",
-              overflowY: "auto",
-              padding: 20,
-              borderRadius: 14,
-              border: "1px solid var(--dsw-alias-separator)",
-              background: "var(--dsw-alias-fill-panel, var(--dsw-alias-fill-input))",
-            }}
-          >
-            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>
-              {overlay.kind === "creating"
-                ? t("createTitle")
-                : t("editTitle")}
-            </div>
-            {overlay.kind === "creating" ? (
-              <AgentForm
-                t={t}
-                catalog={catalog}
-                submitLabel={t("submitCreate")}
-                onSubmit={onCreate}
-                onCancel={() => {
-                  setOverlay({ kind: "closed" });
-                }}
-              />
-            ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {overlay.kind === "creating" ? (
+            <AgentForm
+              t={t}
+              catalog={catalog}
+              submitLabel={t("submitCreate")}
+              onSubmit={onCreate}
+              onCancel={() => {
+                setOverlay({ kind: "closed" });
+              }}
+            />
+          ) : (
+            overlay.kind === "editing" && (
               <>
                 <AgentForm
                   t={t}
@@ -345,7 +323,7 @@ export function JunjiPanel({ open, t }: PanelProps): ReactNode {
                   initial={overlay.agent}
                   submitLabel={t("submitSave")}
                   onSubmit={(values) => {
-                    return onEdit(overlay.kind === "editing" ? overlay.agent.id : "", values);
+                    return onEdit(overlay.agent.id, values);
                   }}
                   onCancel={() => {
                     setOverlay({ kind: "closed" });
@@ -361,9 +339,10 @@ export function JunjiPanel({ open, t }: PanelProps): ReactNode {
                   {t("removeHint")}
                 </div>
               </>
-            )}
-          </div>
+            )
+          )}
         </div>
+        </Modal>
       )}
     </div>
   );
