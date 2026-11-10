@@ -1,0 +1,116 @@
+E1 2026-11-06 12:09:48 +0800
+工作目录 /Volumes/machub_app/proj/x-agent-team
+比较基线 e8f0bd0
+9a0faf3ba8a23b706fff6c3761dedfe246183083beed416c8f3f9e2b6c849434  packages/kmh-junji/src/client/AgentForm.tsx
+
+执行 pnpm typecheck && pnpm test
+
+> x-agent-team@ typecheck /Volumes/machub_app/proj/x-agent-team
+> pnpm -r typecheck
+
+
+> @kmh/kmh-junji@0.1.0 typecheck /Volumes/machub_app/proj/x-agent-team/packages/kmh-junji
+> tsc -p tsconfig.host.json --noEmit && tsc -p tsconfig.browser.json --noEmit
+
+
+> x-agent-team@ test /Volumes/machub_app/proj/x-agent-team
+> pnpm -r test
+
+
+> @kmh/kmh-junji@0.1.0 pretest /Volumes/machub_app/proj/x-agent-team/packages/kmh-junji
+> pnpm build
+
+
+> @kmh/kmh-junji@0.1.0 build /Volumes/machub_app/proj/x-agent-team/packages/kmh-junji
+> node build.mjs
+
+
+> @kmh/kmh-junji@0.1.0 test /Volumes/machub_app/proj/x-agent-team/packages/kmh-junji
+> node --test --test-concurrency=1 test/*.test.mjs
+
+✔ resolveMemoryFiles 落在 agent 独立目录 (0.643333ms)
+✔ 首次初始化：原始为空文件，冻结缺失时发布空冻结 (5.152166ms)
+✔ 创建时已有原始内容则完整发布为冻结（创建时加载） (2.531625ms)
+✔ 原始为空且冻结已有时保留既有冻结（不清空） (1.115292ms)
+✔ 压缩刷新：完整原始字节原子替换冻结（压缩时加载） (3.384042ms)
+✔ slugify 保留中日韩名字并折叠空白与分隔符 (0.8ms)
+✔ reserve 落盘 reserved 档案并可 list 读回 (6.543959ms)
+✔ 重名 reserve 追加后缀去重，永不覆盖 (9.553042ms)
+✔ update 合并字段并原子替换；remove 连目录移除 (3.82025ms)
+✔ 损坏档案目录跳过并上报，不阻塞其余 agent (2.88925ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 244.343958
+
+E1 退出码 0
+
+E2 浏览器 60000，旧版编辑表单 appearance=auto，无独立箭头，预填 GLM-5.3。
+重载后服务 PID 42571。创建和编辑表单 appearance=none，箭头右距 12px、中心差 0px、文字右侧留白 32px，两个下拉均有 100 个选项。
+编辑表单预填 GLM-5.3。图标可见，引用宿主 SVG，aria-hidden=true，pointer-events=none。图标中心命中原生 select。
+空白创建表单通过浏览器选择操作由 GPT-6.1 Sol 切为 DeepSeek-V4.1-Flash，随后取消，编辑表单复开仍预填 GLM-5.3。键盘可聚焦，浏览器自动化未确认键盘选中不同选项。
+键盘检查回车意外保存现有大臣表单。按历史会话 12:08:22 的选值，用会话模型菜单恢复 openai/gpt-6.1-sol/medium。核对会话模型事件和 profile agent-default-model 均已恢复；档案更新时间保留此次保存的 12:10:44。
+
+E3 技术复查：git diff --check
+git diff --check 退出码 0
+ESLint：本仓库没有 ESLint 配置。
+Prettier：检查同一工具下任务前版本与当前文件。
+Files - and /dev/fd/15 differ
+任务前文件格式比较退出码 1
+Checking formatting...
+[warn] packages/kmh-junji/src/client/AgentForm.tsx
+[warn] Code style issues found in the above file. Run Prettier with --write to fix.
+当前文件格式检查退出码 1
+
+E4 技术复跑（仅对新增 JSX 换行）
+9d17388094ff70aab70da03f103c1ebcc0387d4d3f0d63cb0afe635e2e8f5c63  packages/kmh-junji/src/client/AgentForm.tsx
+
+> x-agent-team@ typecheck /Volumes/machub_app/proj/x-agent-team
+> pnpm -r typecheck
+
+
+> @kmh/kmh-junji@0.1.0 typecheck /Volumes/machub_app/proj/x-agent-team/packages/kmh-junji
+> tsc -p tsconfig.host.json --noEmit && tsc -p tsconfig.browser.json --noEmit
+
+
+> x-agent-team@ test /Volumes/machub_app/proj/x-agent-team
+> pnpm -r test
+
+
+> @kmh/kmh-junji@0.1.0 pretest /Volumes/machub_app/proj/x-agent-team/packages/kmh-junji
+> pnpm build
+
+
+> @kmh/kmh-junji@0.1.0 build /Volumes/machub_app/proj/x-agent-team/packages/kmh-junji
+> node build.mjs
+
+
+> @kmh/kmh-junji@0.1.0 test /Volumes/machub_app/proj/x-agent-team/packages/kmh-junji
+> node --test --test-concurrency=1 test/*.test.mjs
+
+✔ resolveMemoryFiles 落在 agent 独立目录 (0.67125ms)
+✔ 首次初始化：原始为空文件，冻结缺失时发布空冻结 (4.9145ms)
+✔ 创建时已有原始内容则完整发布为冻结（创建时加载） (2.497084ms)
+✔ 原始为空且冻结已有时保留既有冻结（不清空） (1.316292ms)
+✔ 压缩刷新：完整原始字节原子替换冻结（压缩时加载） (3.48075ms)
+✔ slugify 保留中日韩名字并折叠空白与分隔符 (0.771ms)
+✔ reserve 落盘 reserved 档案并可 list 读回 (5.944083ms)
+✔ 重名 reserve 追加后缀去重，永不覆盖 (8.770292ms)
+✔ update 合并字段并原子替换；remove 连目录移除 (2.186833ms)
+✔ 损坏档案目录跳过并上报，不阻塞其余 agent (2.115667ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 198.469
+
+E4 退出码 0
+51f2be1c72a13e3ad209543b58bb15c61652b4c93468db4057dab9ec0d6bdb10  packages/kmh-junji/lib/client.js
+E4 与 E2 浏览器版本的 AgentForm esbuild 最小化输出逐字节相同。

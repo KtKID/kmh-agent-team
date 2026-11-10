@@ -1,6 +1,9 @@
 /** 创建/编辑大臣的表单：名字、系统提示词、模型目录下拉。 */
 import { useState, type ReactNode } from "react";
-import { Button } from "@deepseek-ai/dsh-client-ui-primitives";
+import {
+  Button,
+  IconChevronDownOutlineRegular,
+} from "@deepseek-ai/dsh-client-ui-primitives";
 import type { PropsLocale } from "@deepseek-ai/dsh-client-ui-slots";
 import type {
   AgentModel,
@@ -138,43 +141,65 @@ export function AgentForm({
           }}
         />
       </div>
-      <style>{`.junji-field:focus{border-color:var(--dsw-alias-state-business-primary);outline:none}.junji-field::placeholder{color:var(--dsw-alias-label-dimmed)}`}</style>
+      <style>{`
+        .junji-field:focus {
+          border-color: var(--dsw-alias-state-business-primary);
+          outline: none;
+        }
+        .junji-field::placeholder {
+          color: var(--dsw-alias-label-dimmed);
+        }
+        .junji-model-chevron {
+          position: absolute;
+          inset-inline-end: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          pointer-events: none;
+          color: var(--dsw-alias-label-secondary);
+        }
+      `}</style>
       <div>
         <label style={labelStyle} htmlFor="junji-agent-model">
           {t("model")}
         </label>
-        <select
-          id="junji-agent-model"
-          className="junji-field"
-          style={fieldStyle}
-          value={selection}
-          onChange={(event) => {
-            setSelection(event.target.value);
-          }}
-        >
-          {initial !== undefined && !known ? (
-            <optgroup label={t("currentModel")}>
-              <option value={encodeModel(initial.model)}>
-                {initial.model.provider}/{initial.model.model}
-              </option>
-            </optgroup>
-          ) : null}
-          {catalog.groups.map((group) => (
-            <optgroup key={group.id} label={group.name}>
-              {group.models.map((entry) => (
-                <option
-                  key={`${group.id}/${entry.id}`}
-                  value={encodeModel({
-                    provider: group.id,
-                    model: entry.id,
-                  })}
-                >
-                  {entry.name}
+        <div style={{ position: "relative" }}>
+          <select
+            id="junji-agent-model"
+            className="junji-field"
+            style={{ ...fieldStyle, appearance: "none", paddingInlineEnd: 32 }}
+            value={selection}
+            onChange={(event) => {
+              setSelection(event.target.value);
+            }}
+          >
+            {initial !== undefined && !known ? (
+              <optgroup label={t("currentModel")}>
+                <option value={encodeModel(initial.model)}>
+                  {initial.model.provider}/{initial.model.model}
                 </option>
-              ))}
-            </optgroup>
-          ))}
-        </select>
+              </optgroup>
+            ) : null}
+            {catalog.groups.map((group) => (
+              <optgroup key={group.id} label={group.name}>
+                {group.models.map((entry) => (
+                  <option
+                    key={`${group.id}/${entry.id}`}
+                    value={encodeModel({
+                      provider: group.id,
+                      model: entry.id,
+                    })}
+                  >
+                    {entry.name}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+          <IconChevronDownOutlineRegular
+            className="junji-model-chevron"
+            size={12}
+          />
+        </div>
       </div>
       {error === undefined ? null : (
         <div role="alert" style={{ fontSize: 12, color: "var(--dsw-alias-state-error-primary)" }}>
