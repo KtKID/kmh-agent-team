@@ -1,5 +1,5 @@
 {
-  "name": "x-agent-team",
+  "name": "kmh-agent-team",
   "private": true,
   "type": "module",
   "description": "军机阁（kmh-junji）：基于 DeepSeek Harness 的用户自建 agent 团队插件仓库",
@@ -8,6 +8,6 @@
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "format:check": "pnpm -r format:check",
-    "postinstall": "node scripts/link-cordis.mjs"
+    "postinstall": "node scripts/link-dsh.mjs"
   }
 }

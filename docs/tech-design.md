@@ -26,7 +26,7 @@
 ## 2. 架构总览
 
 ```
-x-agent-team/                                  ← 独立仓库（本仓库）
+kmh-agent-team/                                ← 独立仓库（本仓库）
   packages/kmh-junji/                          ← @kmh/kmh-junji 插件包
     src/index.ts            host 侧入口（Cordis 插件）
     src/registry/           agent 注册表（CRUD + 持久化）
@@ -105,13 +105,14 @@ $DSH_HOME/agent-team/
 - **侧边栏"军机阁"区块**：通过 client 插件注入（`dsh.client.inject` 同 kmh-team 模式）。区块 = 标题行（"军机阁" + ➕）+ agent 列表（名字 + 模型微标签 + 最近活动时间）；点击 agent → 打开其专属 session；右键/hover 菜单：编辑（改系统提示词/模型/名字）、删除（确认弹窗，说明记忆目录一并删除、会话保留）。
 - **创建面板**（点 ➕ 弹出）：名字（必填）、系统提示词（多行 textarea，必填，带占位示例）、模型（下拉，来自模型目录）；提交 → host create → 列表刷新 → 直接打开新 agent 会话。
 - **编辑面板**：同创建面板复用，预填现值。
+- **模型下拉**：箭头距右边框约 12 像素，长模型名有独立的文字空间，鼠标和键盘均可选择。
 - i18n：文案走 locale 字典（kmh 一期为中文为主，结构上留 en）。
 - 侧边栏注入的扩展点（ui-sidebar 的 section 契约 / ui-slots）在 Phase 3 开工时先做一次 spike 验证；若 ui-sidebar 不开放第三方 section，降级方案为"新建会话"旁的入口 + 会话头部署名（参照 kmh-team 的接入方式），但目标仍是侧边栏区块。
 
 ## 6. 集成与加载
 
-1. 本仓库 pnpm workspace，包依赖 `link:` 指向 `/Volumes/machub_app/proj/kongming-os/third_party/dsh/packages/...`（同 kmh-team 的 peer/dev 面）。
-2. kongming-os `profiles/kmh-web/package.json`：dependencies 加 `"@kmh/kmh-junji": "link:/Volumes/machub_app/proj/x-agent-team/packages/kmh-junji"`，`dsh.profile.bundles` 加包名——**这步改的是 kongming-os 仓库（本工作区之外），需要用户批准或用户自己改**。
+1. 本仓库 pnpm workspace；DSH 同侪依赖不在 devDependencies 写死 `link:` 路径（仓库相对 kongming-os 的位置不稳定），由 postinstall 脚本 `scripts/link-dsh.mjs` 运行时定位（env `KONGMING_OS_DIR` 优先，否则自仓库根逐级向上探测 `kongming-os/third_party/dsh`）并符号链接进包内 node_modules；版本面以 peerDependencies 声明为准（peer 面同 kmh-team）。
+2. kongming-os `profiles/kmh-web/package.json`：dependencies 加 `"@kmh/kmh-junji": "link:/Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji"`，`dsh.profile.bundles` 加包名——**这步改的是 kongming-os 仓库（本工作区之外），需要用户批准或用户自己改**。
 3. 重建 profile（kongming-os 侧 pnpm install + 重启 GUI）。
 
 ## 7. 分期计划
@@ -140,3 +141,7 @@ $DSH_HOME/agent-team/
 - **R2 per-session persona/模型**：路径 A/B 定案（§4.2）；模型 per-session 设置入口待查 session-controller API。
 - **R3 压缩回执监听**：kongming-memory-v1 依赖手动 `/compact` 的成功回执事件；junji 需确认该事件按 session 可过滤、自动压缩是否也需刷新冻结（原插件语义：只有手动压缩刷新；一期沿用）。
 - **R4 工作区沙箱**：集成阶段需写 kongming-os（工作区外）与 `$DSH_HOME`，涉及审批；开发期全部产物落在本仓库。
+
+## 变更记录
+
+- 2026-11-06 · 修改 §5 模型下拉 · 增加箭头右侧留白 · [任务记录](task/task-model-select-chevron.md) · 60000 已复验样式

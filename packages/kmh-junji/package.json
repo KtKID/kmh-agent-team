@@ -63,32 +63,11 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@deepseek-ai/schemastery": "link:../../../kongming-os/third_party/dsh/vendor/schemastery",
-    "@deepseek-ai/dsh-agent": "link:../../../kongming-os/third_party/dsh/packages/core/agent",
-    "@deepseek-ai/dsh-session": "link:../../../kongming-os/third_party/dsh/packages/core/session",
-    "@deepseek-ai/dsh-home-paths": "link:../../../kongming-os/third_party/dsh/packages/util/home-paths",
-    "@deepseek-ai/dsh-system-prompt": "link:../../../kongming-os/third_party/dsh/packages/core/system-prompt",
-    "@deepseek-ai/dsh-workspace": "link:../../../kongming-os/third_party/dsh/packages/workspace/workspace",
-    "@deepseek-ai/dsh-client-connection": "link:../../../kongming-os/third_party/dsh/packages/client/connection",
-    "@deepseek-ai/dsh-api-session-controller": "link:../../../kongming-os/third_party/dsh/packages/api/session-controller",
-    "@deepseek-ai/dsh-llm": "link:../../../kongming-os/third_party/dsh/packages/llm/llm",
-    "@deepseek-ai/dsh-compaction": "link:../../../kongming-os/third_party/dsh/packages/compaction/compaction",
-    "@deepseek-ai/dsh-commands": "link:../../../kongming-os/third_party/dsh/packages/interaction/commands",
-    "@deepseek-ai/dsh-client-ui-slots": "link:../../../kongming-os/third_party/dsh/packages/client/ui-slots",
-    "@deepseek-ai/dsh-client-ui-workspace": "link:../../../kongming-os/third_party/dsh/packages/client/ui-workspace",
-    "@deepseek-ai/dsh-client-locale": "link:../../../kongming-os/third_party/dsh/packages/client/locale",
-    "@deepseek-ai/dsh-client-ui-primitives": "link:../../../kongming-os/third_party/dsh/packages/client/ui-primitives",
-    "@deepseek-ai/dsh-client-ui-session": "link:../../../kongming-os/third_party/dsh/packages/client/ui-session",
-    "@deepseek-ai/dsh-client-store": "link:../../../kongming-os/third_party/dsh/packages/client/store",
-    "@deepseek-ai/dsh-brand": "link:../../../kongming-os/third_party/dsh/packages/util/brand",
     "esbuild": "^0.28.1",
     "typescript": "^6.0.3",
     "@types/node": "^22.20.0",
     "react": "^18.3.1",
-    "@types/react": "^18.3.31",
-    "@deepseek-ai/dsh-client-ui-layout": "link:../../../kongming-os/third_party/dsh/packages/client/ui-layout",
-    "@deepseek-ai/dsh-client-ui-sidebar": "link:../../../kongming-os/third_party/dsh/packages/client/ui-sidebar",
-    "@deepseek-ai/dsh-client-ui-renderer": "link:../../../kongming-os/third_party/dsh/packages/client/ui-renderer"
+    "@types/react": "^18.3.31"
   },
   "dsh": {
     "client": {
