@@ -46,6 +46,12 @@ const DSH_PACKAGES = {
   "dsh-client-ui-layout": "packages/client/ui-layout",
   "dsh-client-ui-sidebar": "packages/client/ui-sidebar",
   "dsh-client-ui-renderer": "packages/client/ui-renderer",
+  // 删除会话回归使用真实执行循环、归档和本地持久化。
+  "dsh-agent-loop-testkit": "packages/test-support/agent-loop-testkit",
+  "dsh-session-persistence-jsonl": "packages/session/session-persistence-jsonl",
+  "dsh-storage": "packages/storage/storage",
+  "dsh-storage-json": "packages/storage/storage-json",
+  "dsh-storage-domain": "packages/storage/storage-domain",
 };
 
 function findKongmingOs() {

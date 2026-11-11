@@ -100,7 +100,7 @@ function definitions(
     ),
     tool(
       "junji_remove_agent",
-      "Request user approval to delete a Junji Agent's profile and memory while preserving its session history.",
+      "Request user approval to stop and archive a Junji Agent's session, then delete its profile and memory. The archived session retains its history.",
       AgentInput,
       async ({ agentId }, { callId, signal }) => {
         const record = runtime.list().find(({ id }) => id === agentId);
@@ -110,7 +110,7 @@ function definitions(
           agent: source,
           toolName: "junji_remove_agent",
           callId,
-          reason: `删除军机阁大臣「${record.name}」（${agentId}）的档案和记忆，保留会话历史。`,
+          reason: `停止并归档军机阁大臣「${record.name}」（${agentId}）的会话，删除其档案和记忆，保留会话历史。`,
           signal,
         });
         signal.throwIfAborted();

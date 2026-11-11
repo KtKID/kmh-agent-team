@@ -22,7 +22,7 @@ export const zh = {
   openFailed: "打开会话失败",
   requiredFields: "名字和系统提示词不能为空",
   currentModel: "当前模型",
-  removeHint: "删除后记忆小本子一并移除，历史会话保留",
+  removeHint: "进行中的任务会被停止，会话归档并保留历史，记忆小本子一并移除",
 } as const;
 
 export type JunjiKey = keyof typeof zh;
@@ -49,5 +49,6 @@ export const en: Record<JunjiKey, string> = {
   openFailed: "Failed to open session",
   requiredFields: "Name and system prompt are required",
   currentModel: "Current model",
-  removeHint: "Memory notes are removed; the session history stays",
+  removeHint:
+    "Running work will stop and the session will be archived. Memory notes will be removed and chat history kept.",
 };

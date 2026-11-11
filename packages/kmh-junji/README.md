@@ -44,7 +44,7 @@
 - `junji_list_agents` / `junji_list_models` — 列出大臣与可用模型目录
 - `junji_create_agent` / `junji_update_agent` — 创建 / 改名、改提示词、改模型
 - `junji_open_agent` — 准备某大臣的专属会话并返回 sessionId
-- `junji_remove_agent` — 走用户审批删除档案与记忆（会话历史保留）
+- `junji_remove_agent` — 用户批准后停止成员的会话任务，归档会话，再删除档案与记忆。归档保留聊天历史。
 
 ## 模块导出
 

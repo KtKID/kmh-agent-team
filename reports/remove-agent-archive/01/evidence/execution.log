@@ -1,0 +1,70 @@
+2026-11-11 23:46:43 +0800
+/Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+08f0650
+v25.6.1
+
+> @kmh/kmh-junji@0.1.1 pretest /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+> pnpm build
+
+
+> @kmh/kmh-junji@0.1.1 build /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+> node build.mjs
+
+
+> @kmh/kmh-junji@0.1.1 test /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+> node --test --test-concurrency=1 test/*.test.mjs
+
+✔ tool_registered：工具集包含 junji_send (1.664542ms)
+✔ send_happy_path：就绪会话后投递 kmh-relay 消息并返回回执 (2.733917ms)
+✔ send_agent_not_found：大臣不存在时报错且不投递 (0.647584ms)
+✔ send_blank_content：空白正文报错 (0.261333ms)
+✔ send_source_inactive：挂载释放后工具拒绝执行 (0.278375ms)
+✔ send_flow_combo：发送→作答→回传孔明一次（真 sendAndWatch 链路） (0.569875ms)
+✔ send_release_tracked：挂载释放清理轮次监听 (0.510125ms)
+✔ resolveMemoryFiles 落在 agent 独立目录 (0.769875ms)
+✔ 首次初始化：原始为空文件，冻结缺失时发布空冻结 (5.42225ms)
+✔ 创建时已有原始内容则完整发布为冻结（创建时加载） (2.208708ms)
+✔ 原始为空且冻结已有时保留既有冻结（不清空） (1.321375ms)
+✔ 压缩刷新：完整原始字节原子替换冻结（压缩时加载） (3.256792ms)
+✔ slugify 保留中日韩名字并折叠空白与分隔符 (0.783583ms)
+✔ reserve 落盘 reserved 档案并可 list 读回 (5.483125ms)
+✔ 重名 reserve 追加后缀去重，永不覆盖 (8.521458ms)
+✔ update 合并字段并原子替换；remove 连目录移除 (2.022375ms)
+✔ 损坏档案目录跳过并上报，不阻塞其余 agent (1.6025ms)
+✔ T1：删除先打断生成和清空队列，再归档并保留会话历史 (112.228667ms)
+✔ T2：成员创建中断后可清理无会话的档案 (17.506791ms)
+✔ T3：归档失败时保留档案，重试成功后移除 (66.958ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 661.145917
+
+> @kmh/kmh-junji@0.1.1 typecheck /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+> tsc -p tsconfig.host.json --noEmit && tsc -p tsconfig.browser.json --noEmit
+
+✔ T1：删除先打断生成和清空队列，再归档并保留会话历史 (119.291875ms)
+✔ T2：成员创建中断后可清理无会话的档案 (18.475125ms)
+✔ T3：归档失败时保留档案，重试成功后移除 (74.570042ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 423.218334
+ℹ start of coverage report
+ℹ --------------------------------------------------------------------------------------------------------------------------------------------
+ℹ file         | line % | branch % | funcs % | uncovered lines
+ℹ --------------------------------------------------------------------------------------------------------------------------------------------
+ℹ lib          |        |          |         |
+ℹ  src         |        |          |         |
+ℹ   runtime.js |  63.35 |    78.72 |   60.00 | 47 74-81 88-92 101-102 104-128 164 172-177 180-190 193-223 226-238 241-245 249 309-315 318-319
+ℹ --------------------------------------------------------------------------------------------------------------------------------------------
+ℹ all files    |  63.35 |    78.72 |   60.00 |
+ℹ --------------------------------------------------------------------------------------------------------------------------------------------
+ℹ end of coverage report

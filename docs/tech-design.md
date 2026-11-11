@@ -67,7 +67,7 @@ $DSH_HOME/agent-team/
   1. 生成 slug agentId，建目录，写 agent.json；
   2. 初始化 MEMORY.md（空文件 0600）与 MEMORY.frozen.md（首次发布：原始为空时保留已有冻结/发布空冻结——沿用 kongming-memory-v1 initializeMemoryFiles 语义）；
   3. 创建专属 DSH session（persona=systemPrompt、model=model），回写 sessionId。
-- `remove(id)`：删 agent 目录（含记忆）；session 保留（历史不销毁，可在二期提供"连会话一起删"选项）。
+- `remove(id)`：按成员绑定的会话 ID 打断运行中的任务，清理活动会话的待处理输入，等待该轮结束后调用宿主归档，再移除成员档案和记忆。会话历史随归档保留；取消归档只恢复会话。宿主归档失败时保留成员档案供重试。
 - `update(id, { name?, systemPrompt?, model? })`：写 agent.json；systemPrompt/model 变更只影响后续请求（persona 装配是每次请求时进行）。
 
 ### 4.2 Agent↔Session 一对一绑定（session/）
@@ -102,7 +102,7 @@ $DSH_HOME/agent-team/
 
 ## 5. Client 侧设计
 
-- **侧边栏"军机阁"区块**：通过 client 插件注入（`dsh.client.inject` 同 kmh-team 模式）。区块 = 标题行（"军机阁" + ➕）+ agent 列表（名字 + 模型微标签 + 最近活动时间）；点击 agent → 打开其专属 session；右键/hover 菜单：编辑（改系统提示词/模型/名字）、删除（确认弹窗，说明记忆目录一并删除、会话保留）。
+- **侧边栏"军机阁"区块**：通过 client 插件注入（`dsh.client.inject` 同 kmh-team 模式）。区块 = 标题行（"军机阁" + ➕）+ agent 列表（名字 + 模型微标签 + 最近活动时间）；点击 agent → 打开其专属 session；右键/hover 菜单：编辑（改系统提示词/模型/名字）、删除（确认后停止任务、归档会话并移除记忆目录）。
 - **创建面板**（点 ➕ 弹出）：名字（必填）、系统提示词（多行 textarea，必填，带占位示例）、模型（下拉，来自模型目录）；提交 → host create → 列表刷新 → 直接打开新 agent 会话。
 - **编辑面板**：同创建面板复用，预填现值。
 - **模型下拉**：箭头距右边框约 12 像素，长模型名有独立的文字空间，鼠标和键盘均可选择。
@@ -132,7 +132,7 @@ $DSH_HOME/agent-team/
 3. 对话收尾后 agent 把内容记进自己的 `MEMORY.md`（`$DSH_HOME/agent-team/<id>/`）。
 4. `/compact` 成功后 `MEMORY.frozen.md` 被原始文件原子替换；下次装配注入新冻结正文。
 5. 两个 agent 并行使用，会话、记忆、压缩互不串扰（目录级隔离 + sessionId 不变）。
-6. 删除 agent 后目录移除、侧边栏消失；其历史 session 仍可在会话列表找到。
+6. 删除 agent 时打断正在执行的会话任务，归档其历史会话并移除成员档案及记忆。成员和会话从默认侧栏收起，历史可从已归档列表恢复。
 7. 重启 GUI 后 agent 列表与绑定关系完整恢复。
 
 ## 9. 风险与待研究
@@ -144,4 +144,5 @@ $DSH_HOME/agent-team/
 
 ## 变更记录
 
+- 2026-11-11 · 修改 §4.1、§5 删除大臣 · 停止任务并归档会话 · [任务记录](task/task-remove-agent-archive.md)
 - 2026-11-06 · 修改 §5 模型下拉 · 增加箭头右侧留白 · [任务记录](task/task-model-select-chevron.md) · 60000 已复验样式

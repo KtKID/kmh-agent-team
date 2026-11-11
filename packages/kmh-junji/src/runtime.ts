@@ -4,8 +4,8 @@ import type { Context } from "@deepseek-ai/cordis";
 import type { Agent, ModelSelection } from "@deepseek-ai/dsh-agent";
 import { ReasoningEffortId } from "@deepseek-ai/dsh-llm";
 import { SessionId } from "@deepseek-ai/dsh-session";
+import { WorkspaceUnknownSessionError } from "@deepseek-ai/dsh-workspace";
 import type { Workspace } from "@deepseek-ai/dsh-workspace/types";
-import type {} from "@deepseek-ai/dsh-workspace";
 import type {} from "@deepseek-ai/dsh-api-session-controller";
 import { AgentStore } from "./registry.ts";
 import { mountAgentPrompt } from "./prompt.ts";
@@ -159,7 +159,7 @@ export class JunjiRuntime {
   }
 
   /**
-   * 删除 agent：目录与记忆一并移除；专属会话保留（历史不销毁）。
+   * 停止并归档成员的专属会话，再移除档案与记忆。归档异常时保留档案供重试。
    * @param id - agent 稳定标识。
    * @param approved - 工具获得批准时显示的档案版本。
    */
@@ -174,7 +174,23 @@ export class JunjiRuntime {
     const record = this.requireRecord(id);
     if (approved !== undefined && record !== approved)
       throw Error("大臣档案在确认期间已变更，请重新确认");
-    this.releasePrompt(SessionId(record.sessionId));
+    const sessionId = SessionId(record.sessionId);
+    const agent = this.ctx.agents.get(sessionId);
+    if (agent !== undefined) {
+      agent.cancel({ kind: "user" }, { keepInbox: false });
+      await agent.whenIdle();
+    }
+    try {
+      // 宿主归档同时停止关联活动，并封住取消与归档之间的新唤醒。
+      await this.ctx.workspaceRegistry.archiveSession(sessionId, {
+        stopActivity: true,
+      });
+    } catch (error) {
+      // 创建中断可能只留下成员档案，此时没有会话可归档。
+      if (!(error instanceof WorkspaceUnknownSessionError)) throw error;
+    }
+    await this.ctx.agents.get(sessionId)?.whenIdle();
+    this.releasePrompt(sessionId);
     const memory = this.memories.get(record.sessionId);
     if (memory !== undefined) {
       this.memories.delete(record.sessionId);
