@@ -1,7 +1,8 @@
 /** 军机阁运行时：agent↔session 一对一永久绑定的创建、恢复、更新与提示词装载。 */
 import { mkdir, realpath } from "node:fs/promises";
 import type { Context } from "@deepseek-ai/cordis";
-import type { Agent } from "@deepseek-ai/dsh-agent";
+import type { Agent, ModelSelection } from "@deepseek-ai/dsh-agent";
+import { ReasoningEffortId } from "@deepseek-ai/dsh-llm";
 import { SessionId } from "@deepseek-ai/dsh-session";
 import type { Workspace } from "@deepseek-ai/dsh-workspace/types";
 import type {} from "@deepseek-ai/dsh-workspace";
@@ -36,6 +37,7 @@ export class JunjiRuntime {
   private workspace: Workspace | undefined;
   private closed = false;
   private closing: Promise<void> | undefined;
+  private operations = Promise.resolve();
 
   /**
    * @param ctx - 插件生命周期上下文。
@@ -58,7 +60,7 @@ export class JunjiRuntime {
     ctx.on("agent/disposed", ({ agent }) => {
       this.releasePrompt(agent.id);
     });
-    ctx.effect(() => () => void this.close(), "kmh-junji: settle runtime");
+    ctx.effect(() => () => this.close(), "kmh-junji: settle runtime");
   }
 
   /** 启动恢复：读档案、装载已存活 agent 的提示词；单个损坏档案不阻塞。 */
@@ -89,11 +91,13 @@ export class JunjiRuntime {
    * @returns 档案与专属会话 id。
    */
   async create(input: CreateAgentInput): Promise<AgentCreated> {
-    this.requireOpen();
-    const record = await this.store.reserve(input);
-    this.records.set(record.id, record);
-    const ready = await this.ensureAgent(record);
-    return { agent: ready, sessionId: ready.sessionId };
+    return this.run(async () => {
+      const selection = await this.resolveModel(input.model);
+      const record = await this.store.reserve(input);
+      this.records.set(record.id, record);
+      const ready = await this.ensureAgent(record, selection);
+      return { agent: ready, sessionId: ready.sessionId };
+    });
   }
 
   /**
@@ -102,9 +106,10 @@ export class JunjiRuntime {
    * @returns 专属会话 id，客户端据此切换会话。
    */
   async open(id: string): Promise<{ sessionId: string }> {
-    this.requireOpen();
-    const ready = await this.ensureAgent(this.requireRecord(id));
-    return { sessionId: ready.sessionId };
+    return this.run(async () => {
+      const ready = await this.ensureAgent(this.requireRecord(id));
+      return { sessionId: ready.sessionId };
+    });
   }
 
   /**
@@ -115,21 +120,35 @@ export class JunjiRuntime {
    * @returns 更新后的完整档案。
    */
   async update(id: string, patch: UpdateAgentInput): Promise<AgentRecord> {
-    this.requireOpen();
-    this.requireRecord(id);
+    return this.run(() => this.updateRecord(id, patch));
+  }
+
+  private async updateRecord(
+    id: string,
+    patch: UpdateAgentInput,
+  ): Promise<AgentRecord> {
+    const record = this.requireRecord(id);
+    const selection =
+      patch.model === undefined
+        ? undefined
+        : await this.resolveModel(patch.model);
+    const agent =
+      selection !== undefined && record.phase === "ready"
+        ? await this.resolveAgent(record)
+        : undefined;
     const next = await this.store.update(id, patch);
     this.records.set(id, next);
-    if (patch.name !== undefined)
+    if (patch.name !== undefined && record.phase === "ready")
       await this.ctx.sessionController.rename({
         sessionId: SessionId(next.sessionId),
         title: next.name,
       });
-    if (patch.model !== undefined)
-      await this.selectModel(next.sessionId, patch.model);
+    if (selection !== undefined && agent !== undefined)
+      agent.model.select(selection);
     if (patch.systemPrompt !== undefined) {
       const live = this.liveAgents.get(next.sessionId);
       if (live !== undefined) {
-        this.releasePrompt(SessionId(next.sessionId));
+        this.prompts.get(next.sessionId)?.();
         this.prompts.set(
           next.sessionId,
           mountAgentPrompt(live, patch.systemPrompt),
@@ -142,10 +161,19 @@ export class JunjiRuntime {
   /**
    * 删除 agent：目录与记忆一并移除；专属会话保留（历史不销毁）。
    * @param id - agent 稳定标识。
+   * @param approved - 工具获得批准时显示的档案版本。
    */
-  async remove(id: string): Promise<void> {
-    this.requireOpen();
+  async remove(id: string, approved?: AgentRecord): Promise<void> {
+    return this.run(() => this.removeRecord(id, approved));
+  }
+
+  private async removeRecord(
+    id: string,
+    approved?: AgentRecord,
+  ): Promise<void> {
     const record = this.requireRecord(id);
+    if (approved !== undefined && record !== approved)
+      throw Error("大臣档案在确认期间已变更，请重新确认");
     this.releasePrompt(SessionId(record.sessionId));
     const memory = this.memories.get(record.sessionId);
     if (memory !== undefined) {
@@ -183,16 +211,15 @@ export class JunjiRuntime {
   }
 
   /** 完成或确认 agent 的专属会话；reserved 档案从这里续建。 */
-  private async ensureAgent(record: AgentRecord): Promise<AgentRecord> {
+  private async ensureAgent(
+    record: AgentRecord,
+    validated?: ModelSelection,
+  ): Promise<AgentRecord> {
     if (record.phase === "ready") {
-      const alive = await this.ctx.sessionController.resolveAgent(
-        SessionId(record.sessionId),
-      );
-      if ("error" in alive)
-        throw Error(`军机阁会话恢复失败：${alive.error.message}`);
-      this.bindPrompt(record, alive.agent);
+      this.bindPrompt(record, await this.resolveAgent(record));
       return record;
     }
+    const selection = validated ?? (await this.resolveModel(record.model));
     const workspace = await this.ensureWorkspace();
     const created = await this.ctx.sessionController.create({
       sessionId: SessionId(record.sessionId),
@@ -200,18 +227,14 @@ export class JunjiRuntime {
     });
     if (created.sessionId !== SessionId(record.sessionId))
       throw Error("军机阁会话创建返回了不同的会话，已拒绝绑定");
-    const alive = await this.ctx.sessionController.resolveAgent(
-      SessionId(record.sessionId),
-    );
-    if ("error" in alive)
-      throw Error(`军机阁会话恢复失败：${alive.error.message}`);
-    this.bindPrompt(record, alive.agent);
-    await this.selectModel(record.sessionId, record.model);
+    const agent = await this.resolveAgent(record);
+    this.bindPrompt(record, agent);
+    agent.model.select(selection);
     await this.ctx.sessionController.rename({
       sessionId: SessionId(record.sessionId),
       title: record.name,
     });
-    if (!(await this.ctx.sessions.flush(alive.agent.session)))
+    if (!(await this.ctx.sessions.flush(agent.session)))
       throw Error("军机阁会话保存失败，请重试");
     await workspace.attachSession(SessionId(record.sessionId));
     const ready: AgentRecord = {
@@ -224,16 +247,30 @@ export class JunjiRuntime {
     return ready;
   }
 
-  /** 按 agent 选择会话模型；reasoningEffort 仅在有值时携带。 */
-  private async selectModel(sessionId: string, model: AgentModel): Promise<void> {
-    await this.ctx.sessionController.selectModel({
-      sessionId: SessionId(sessionId),
+  /** 校验可用模型，返回可直接写入目标会话的模型选择。 */
+  private async resolveModel(model: AgentModel): Promise<ModelSelection> {
+    const models = await this.ctx.llm.listModels(model.provider);
+    if (!models.some(({ id }) => id === model.model))
+      throw Error(`模型 ${model.provider}/${model.model} 当前不可用`);
+    const selection = {
       provider: model.provider,
       model: model.model,
       ...(model.reasoningEffort === undefined
         ? {}
-        : { reasoningEffort: model.reasoningEffort }),
-    });
+        : { reasoningEffort: ReasoningEffortId(model.reasoningEffort) }),
+    };
+    await this.ctx.llm.resolveCallConfig(selection);
+    return selection;
+  }
+
+  /** 取回档案绑定的原会话 Agent。 */
+  private async resolveAgent(record: AgentRecord): Promise<Agent> {
+    const resolved = await this.ctx.sessionController.resolveAgent(
+      SessionId(record.sessionId),
+    );
+    if ("error" in resolved)
+      throw Error(`军机阁会话恢复失败：${resolved.error.message}`);
+    return resolved.agent;
   }
 
   private recordBySession(sessionId: SessionId): AgentRecord | undefined {
@@ -253,10 +290,7 @@ export class JunjiRuntime {
   }
 
   /** 记忆绑定：创建或复用该 agent 的记忆服务，初始化文件（创建时加载）并挂全部监听。 */
-  private async bindMemory(
-    record: AgentRecord,
-    agent: Agent,
-  ): Promise<void> {
+  private async bindMemory(record: AgentRecord, agent: Agent): Promise<void> {
     if (this.memoryReleases.has(record.sessionId)) return;
     let memory = this.memories.get(record.sessionId);
     if (memory === undefined) {
@@ -292,8 +326,17 @@ export class JunjiRuntime {
     return record;
   }
 
-  private requireOpen(): void {
-    if (this.closed) throw Error("军机阁插件已停用");
+  /** 串行处理档案变更，停用时等已经开始的工作收尾。 */
+  private run<T>(action: () => Promise<T>): Promise<T> {
+    const result = this.operations.then(() => {
+      if (this.closed) throw Error("军机阁插件已停用");
+      return action();
+    });
+    this.operations = result.then(
+      () => undefined,
+      () => undefined,
+    );
+    return result;
   }
 
   /** 停止插件：取消存活 agent 的执行并释放全部提示词绑定；会话与档案保留。 */
@@ -303,6 +346,7 @@ export class JunjiRuntime {
   }
 
   private async closeOnce(): Promise<void> {
+    await this.operations;
     for (const [sessionId, agent] of this.liveAgents) {
       agent.cancel({ kind: "disposed" }, { keepInbox: true });
       await agent.whenIdle();

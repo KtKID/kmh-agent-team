@@ -5,12 +5,14 @@ import { AgentStore } from "./registry.ts";
 import { JunjiRuntime } from "./runtime.ts";
 import { mountWeb } from "./web.ts";
 import { MemoryConfig } from "./memory/config.ts";
+import { mountKongmingTools } from "./kongming-integration.ts";
 
 export const name = "kmh-junji";
 /** 会话创建/恢复、提示词装配、workspace 挂载与 Web 路由所需的生产服务。 */
 export const inject = [
   "agents",
   "sessions",
+  "llm",
   "systemPrompt",
   "sessionController",
   "workspaceRegistry",
@@ -45,4 +47,5 @@ export async function apply(ctx: Context, config: Config): Promise<void> {
   }
   ctx.provide("junji", runtime);
   mountWeb(ctx, runtime);
+  await mountKongmingTools(ctx, runtime);
 }

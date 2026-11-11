@@ -28,6 +28,8 @@ const DSH_PACKAGES = {
   "dsh-session": "packages/core/session",
   "dsh-home-paths": "packages/util/home-paths",
   "dsh-system-prompt": "packages/core/system-prompt",
+  "dsh-tools": "packages/core/tools",
+  "dsh-user-approval": "packages/interaction/user-approval",
   "dsh-workspace": "packages/workspace/workspace",
   "dsh-client-connection": "packages/client/connection",
   "dsh-api-session-controller": "packages/api/session-controller",
