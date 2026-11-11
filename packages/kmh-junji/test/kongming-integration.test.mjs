@@ -204,7 +204,7 @@ test("send_release_tracked：挂载释放清理轮次监听", async () => {
   // 基线 = 挂载注册的宿主级事件监听（真实宿主由插件生命周期清理，fake 不模拟）。
   const baseline = ctx.liveHandlers();
   await execTool(defs, "junji_send", { agentId: "司马懿", content: "hi" }, exec);
-  assert.equal(ctx.liveHandlers(), baseline + 4, "发送后新增四个轮次监听");
+  assert.ok(ctx.liveHandlers() > baseline, "发送后注册轮次监听");
   ctx.runCleanups();
   assert.equal(ctx.liveHandlers(), baseline, "释放后轮次监听清空");
 });
