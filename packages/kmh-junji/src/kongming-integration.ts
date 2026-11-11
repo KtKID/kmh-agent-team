@@ -3,6 +3,7 @@ import type { Context } from "@deepseek-ai/cordis";
 import type { Agent } from "@deepseek-ai/dsh-agent";
 import type { ToolDefinition, ToolRunContext } from "@deepseek-ai/dsh-tools";
 import type {} from "@deepseek-ai/dsh-user-approval";
+import { sendAndWatch } from "@kmh/session-kit";
 import { z } from "zod";
 import {
   CreateAgentInputSchema,
@@ -25,6 +26,9 @@ declare module "@deepseek-ai/cordis" {
 const agentId = z.string().trim().min(1).describe("Exact Junji Agent ID");
 const AgentInput = z.strictObject({ agentId });
 const UpdateInput = AgentInput.extend({ patch: UpdateAgentInputSchema });
+const SendInput = AgentInput.extend({
+  content: z.string().min(1).describe("Message text to send to the agent"),
+});
 const EmptyInput = z.strictObject({});
 
 /** 将共用的输入校验规则转换成 DSH 支持的 JSON Schema 格式。 */
@@ -55,7 +59,12 @@ function tool<Schema extends z.ZodType>(
   };
 }
 
-function definitions(ctx: Context, runtime: JunjiRuntime, source: Agent) {
+function definitions(
+  ctx: Context,
+  runtime: JunjiRuntime,
+  source: Agent,
+  trackings: (() => void)[],
+) {
   return [
     tool(
       "junji_list_agents",
@@ -110,6 +119,24 @@ function definitions(ctx: Context, runtime: JunjiRuntime, source: Agent) {
         return { removed: true, agentId };
       },
     ),
+    tool(
+      "junji_send",
+      "Send a text message to a Junji Agent's bound session. The agent answers in its own session and the reply arrives automatically in this Kongming session. Wait for it; do not repeat or poll.",
+      SendInput,
+      async ({ agentId, content }) => {
+        if (content.trim() === "") throw Error("消息正文不能为空白");
+        // open 同时保障专属会话已就绪（reserved 档案续建、ready 档案可装载）。
+        const { sessionId } = await runtime.open(agentId);
+        const { dispatchId, release } = await sendAndWatch(ctx, {
+          from: source,
+          toSessionId: sessionId,
+          content: [{ type: "text", text: content }],
+        });
+        // 轮次跟踪的释放入口交给挂载生命周期，卸载时统一清理。
+        trackings.push(release);
+        return { dispatchId, sessionId, agentId, status: "queued" as const };
+      },
+    ),
   ];
 }
 
@@ -133,7 +160,7 @@ export async function mountKongmingTools(
       for (const off of releases.reverse()) off();
     };
     try {
-      for (const definition of definitions(ctx, runtime, agent)) {
+      for (const definition of definitions(ctx, runtime, agent, releases)) {
         releases.push(
           agent.ctx.tools.register(
             {
