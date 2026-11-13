@@ -27,7 +27,9 @@
 | `promptTemplate` | 冻结记忆装配模板。必须包含 `{{originalMemoryPath}}`、`{{frozenMemoryPath}}`、`{{frozenMemory}}` 三个变量；缺省提供默认模板。 |
 | `reminderPrompt` | 收尾提醒文案（提示 agent 把有价值内容记入原始记忆文件）；缺省提供默认文案。 |
 
-## 集成到 DSH host
+## 安装与本地集成
+
+使用 DeepSeek Harness 的「插件」→「添加插件」安装预编译包。步骤和适配版本见 [军机阁仓库首页](https://github.com/KtKID/kmh-agent-team#readme)。
 
 以 kongming-os 的 `kmh-web` profile 为例（其他 DSH host 同理）：
 
@@ -44,6 +46,7 @@
 - `junji_list_agents` / `junji_list_models` — 列出大臣与可用模型目录
 - `junji_create_agent` / `junji_update_agent` — 创建 / 改名、改提示词、改模型
 - `junji_open_agent` — 准备某大臣的专属会话并返回 sessionId
+- `junji_send` — 给指定大臣的专属会话发消息，回复自动回到孔明会话
 - `junji_remove_agent` — 用户批准后停止成员的会话任务，归档会话，再删除档案与记忆。归档保留聊天历史。
 
 ## 模块导出
