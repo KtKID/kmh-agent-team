@@ -1,0 +1,14 @@
+dsh: initialized profile web at /tmp/junji-icon-centered.rScWcJb9/home/profiles/web
+Progress: resolved 0, reused 1, downloaded 0, added 0
+[WARN] Issues with peer dependencies found. Run "pnpm peers check" to list them.
+Packages: +2
+++
+Packages are cloned from the content-addressable store to the virtual store.
+  Content-addressable store is at: /Users/kid/Library/pnpm/store/v11
+  Virtual store is at:             node_modules/.pnpm
+Progress: resolved 2, reused 2, downloaded 0, added 2, done
+
+dependencies:
++ @kmh/kmh-junji 0.1.1
+
+Done in 431ms using pnpm v11.28.5

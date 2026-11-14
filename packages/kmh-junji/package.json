@@ -4,11 +4,13 @@
   "type": "module",
   "description": "军机阁：用户自建 agent 团队（每个 agent 一对一专属会话 + 独立记忆小本子）",
   "license": "MIT",
+  "icon": "./icon.png",
   "files": [
     "lib/src",
     "lib/client.js",
     "README.md",
     "lib/browser-types/**/*.d.ts",
+    "icon.png",
     "cordis.patch.yml"
   ],
   "exports": {

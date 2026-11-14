@@ -8,7 +8,6 @@ import type {} from "@deepseek-ai/dsh-client-ui-workspace/client";
 import type {} from "@deepseek-ai/dsh-client-ui-sidebar/client";
 import type {} from "@deepseek-ai/dsh-client-ui-session/client";
 import type {} from "@deepseek-ai/dsh-client-locale/client";
-import { IconUsersOutlineRegular } from "@deepseek-ai/dsh-client-ui-primitives";
 import type { PropsRuntime } from "@deepseek-ai/dsh-client-ui-slots";
 import { JunjiPanel } from "./JunjiPanel.tsx";
 import { openAgent } from "./transport.ts";
@@ -27,9 +26,27 @@ export const inject = ["slots", "locale", "sessions", "uiWorkspace"];
 /** 军机阁主面板与侧栏启动行共用的面板 id。 */
 const PANEL_ID = brandString<MainPanelId>("kmh-junji");
 
-/** @param props - 侧栏启动行份额。 @returns 军机阁图标。 */
+/** @param props - 宿主提供的侧栏尺寸。 @returns 跟随宿主前景色的双层飞檐图标。 */
 function JunjiIcon({ size }: PropsRuntime<"sidebar.panellist">): ReactNode {
-  return createElement(IconUsersOutlineRegular, { size });
+  return createElement(
+    "svg",
+    {
+      "aria-hidden": true,
+      width: size,
+      height: size,
+      viewBox: "0 0 16 16",
+      fill: "none",
+      stroke: "currentColor",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+    },
+    createElement("path", {
+      d: "M3 6.5C5 6.1 6.6 4.9 8 2.5c1.4 2.4 3 3.6 5 4H3Z",
+    }),
+    createElement("path", {
+      d: "M4.5 6.5C4 8 3 9.2 1.5 10h13c-1.5-.8-2.5-2-3-3.5M4 10v3.5M12 10v3.5M3 13.5h10",
+    }),
+  );
 }
 
 /**

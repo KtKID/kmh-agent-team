@@ -30,6 +30,7 @@ try {
   release.peerDependencies["@deepseek-ai/cordis"] = "4.1.0";
   release.peerDependencies["@deepseek-ai/schemastery"] = "3.19.0";
   await cp(join(plugin, "lib"), join(staging, "lib"), { recursive: true });
+  await cp(join(plugin, manifest.icon), join(staging, manifest.icon));
   await cp(join(plugin, "cordis.patch.yml"), join(staging, "cordis.patch.yml"));
   await cp(join(root, "LICENSE"), join(staging, "LICENSE"));
   await cp(join(plugin, "README.md"), join(staging, "README.md"));

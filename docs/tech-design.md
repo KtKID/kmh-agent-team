@@ -103,6 +103,7 @@ $DSH_HOME/agent-team/
 
 ## 5. Client 侧设计
 
+- **军机阁图标**。插件管理页与仓库 README 使用同一张透明彩色图。侧栏从原图提取双层飞檐轮廓，沿用 DSH 提供的尺寸与前景色。
 - **侧边栏"军机阁"区块**：通过 client 插件注入（`dsh.client.inject` 同 kmh-team 模式）。区块 = 标题行（"军机阁" + ➕）+ agent 列表（名字 + 模型微标签 + 最近活动时间）；点击 agent → 打开其专属 session；右键/hover 菜单：编辑（改系统提示词/模型/名字）、删除（确认后停止任务、归档会话并移除记忆目录）。
 - **创建面板**（点 ➕ 弹出）：名字（必填）、系统提示词（多行 textarea，必填，带占位示例）、模型（下拉，来自模型目录）；提交 → host create → 列表刷新 → 直接打开新 agent 会话。
 - **编辑面板**：同创建面板复用，预填现值。
@@ -146,5 +147,6 @@ $DSH_HOME/agent-team/
 ## 变更记录
 
 - 2026-11-14 · 修改 §4.1 孔明删除大臣 · 支持完全权限下直接删除 · [任务记录](task/task-remove-agent-full-access.md)
+- 2026-11-13 · 修改 §5 军机阁图标 · 插件管理页、侧栏和 README 接入军机阁图标 · [任务记录](task/task-junji-icon.md)
 - 2026-11-11 · 修改 §4.1、§5 删除大臣 · 停止任务并归档会话 · [任务记录](task/task-remove-agent-archive.md)
 - 2026-11-06 · 修改 §5 模型下拉 · 增加箭头右侧留白 · [任务记录](task/task-model-select-chevron.md) · 60000 已复验样式

@@ -1,3 +1,5 @@
+<img src="docs/assets/junji-icon.png" alt="军机阁图标" width="144" height="144" />
+
 # 军机阁
 
 军机阁是 [DeepSeek Harness](https://www.deepseek.com/harness/) 的团队插件。你可以为写作、代码审阅、资料整理等工作创建专职助手（「大臣」），在侧栏统一管理。每位大臣有自己的模型、专属会话和记忆小本子。
@@ -26,6 +28,8 @@ https://github.com/KtKID/kmh-agent-team/releases/latest/download/kmh-junji.tgz
 
 - **专属会话与记忆**。为每位大臣设置职责和模型，使用独立的小本子记录长期信息。
 - **成员管理**。随时修改名字、提示词和模型。删除成员会停止其任务、归档会话，并移除成员档案和记忆。聊天历史仍可从归档中查看。
+
+[观看孔明功能演示（MP4）](docs/assets/media.mp4)
 
 ## 配合孔明使用
 
