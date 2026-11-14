@@ -312,7 +312,14 @@ test("send_flow_combo：发送→作答→回传孔明一次（真 sendAndWatch 
   ctx.emit("agent/inbox/claimed", { agent: target, message: target.followupCalls[0], turn: 2 });
   ctx.emit("session/event", target.session, {
     type: "assistant/message",
-    data: { turn: 2, message: { content: [{ type: "text", text: "一切安好" }] } },
+    data: { turn: 2, stream: [], message: { content: [{ type: "text", text: "一切安好" }] } },
+  });
+  assert.equal(kongming.followupCalls.length, 0, "等业务步骤确认收尾");
+  ctx.emit("agent/turn-stopping", { agent: target, turn: 2, signal: new AbortController().signal });
+  assert.equal(kongming.followupCalls.length, 1, "业务结束立即回传");
+  ctx.emit("session/event", target.session, {
+    type: "assistant/message",
+    data: { turn: 2, stream: [], message: { content: [{ type: "text", text: "记忆维护说明" }] } },
   });
   ctx.emit("session/event", target.session, {
     type: "turn/end",
@@ -323,7 +330,7 @@ test("send_flow_combo：发送→作答→回传孔明一次（真 sendAndWatch 
   assert.equal(reply.source.kind, "kmh-relay");
   assert.equal(reply.source.senderSessionId, "junji-session");
   assert.equal(reply.source.dispatchId, dispatchId);
-  assert.ok(reply.content.some((block) => block.text?.includes("一切安好")));
+  assert.deepEqual(reply.content.slice(1), [{ type: "text", text: "一切安好" }]);
 });
 
 test("send_release_tracked：挂载释放清理轮次监听", async () => {

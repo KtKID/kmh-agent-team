@@ -141,6 +141,7 @@ function definitions(
           from: source,
           toSessionId: sessionId,
           content: [{ type: "text", text: content }],
+          replyBeforeFinalizers: true,
         });
         // 轮次跟踪的释放入口交给挂载生命周期，卸载时统一清理。
         trackings.push(release);
