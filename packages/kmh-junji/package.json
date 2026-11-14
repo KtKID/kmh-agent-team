@@ -29,10 +29,10 @@
     }
   },
   "scripts": {
-    "build": "node build.mjs",
+    "build": "node ../../scripts/link-dsh.mjs && node build.mjs",
     "pretest": "pnpm build",
     "test": "node --test --test-concurrency=1 test/*.test.mjs",
-    "typecheck": "tsc -p tsconfig.host.json --noEmit && tsc -p tsconfig.browser.json --noEmit",
+    "typecheck": "node ../../scripts/link-dsh.mjs && tsc -p tsconfig.host.json --noEmit && tsc -p tsconfig.browser.json --noEmit",
     "lint": "eslint src --max-warnings 0",
     "format:check": "prettier src tsconfig*.json package.json --check"
   },
@@ -76,7 +76,6 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@kmh/session-kit": "link:../../../kmh-session-kit",
     "@types/node": "^22.20.0",
     "@types/react": "^18.3.31",
     "esbuild": "^0.28.1",

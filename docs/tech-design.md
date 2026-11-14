@@ -41,7 +41,7 @@ kmh-agent-team/                                ← 独立仓库（本仓库）
     build.mjs               esbuild 双面构建（host lib + client bundle）
 ```
 
-- 开发位置：本仓库（用户已确认），通过 pnpm `link:` 挂进 kongming-os 的 `profiles/kmh-web`（与 `kmh-team` 同模式），不改 DSH 上游 checkout。
+- 开发位置：本仓库。kongming-os 在 `packages/kmh-plugin/kmh-agent-team` 固定子模块版本，Web profile 通过 pnpm `link:` 加载子模块中的 `packages/kmh-junji`。
 - 宿主：kongming-os `kmh-web` profile（当前 60000 端口 GUI），KMH home 映射为 DSH home。
 
 ## 3. 数据布局
@@ -113,9 +113,8 @@ $DSH_HOME/agent-team/
 
 ## 6. 集成与加载
 
-1. 本仓库 pnpm workspace；DSH 同侪依赖不在 devDependencies 写死 `link:` 路径（仓库相对 kongming-os 的位置不稳定），由 postinstall 脚本 `scripts/link-dsh.mjs` 运行时定位（env `KONGMING_OS_DIR` 优先，否则自仓库根逐级向上探测 `kongming-os/third_party/dsh`）并符号链接进包内 node_modules；版本面以 peerDependencies 声明为准（peer 面同 kmh-team）。
-2. kongming-os `profiles/kmh-web/package.json`：dependencies 加 `"@kmh/kmh-junji": "link:/Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji"`，`dsh.profile.bundles` 加包名——**这步改的是 kongming-os 仓库（本工作区之外），需要用户批准或用户自己改**。
-3. 重建 profile（kongming-os 侧 pnpm install + 重启 GUI）。
+1. `scripts/link-dsh.mjs` 为源码构建定位 DSH 与会话互通库。构建和类型检查会运行该脚本。默认使用 kongming-os 同级 `kmh-plugin/kmh-session-kit` 的构建产物，可用 `SESSION_KIT_DIR` 指定已构建的库，用 `KONGMING_OS_DIR` 指定宿主工作树。
+2. kongming-os 的 `kmh-web` profile 从子模块加载 `@kmh/kmh-junji`，实例由包内 `cordis.patch.yml` 登记。
 
 ## 7. 分期计划
 

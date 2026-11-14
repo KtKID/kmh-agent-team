@@ -1,5 +1,5 @@
 /**
- * 运行时定位 kongming-os，把 DSH 同侪依赖符号链接进包内 node_modules。
+ * 定位 kongming-os 和 session-kit，把构建所需依赖链接进包内 node_modules。
  *
  * 不在 devDependencies 里写死 `link:` 相对路径（仓库相对 kongming-os 的位置
  * 不稳定：可能是兄弟目录，也可能嵌套在 kongming-os/packages/ 下）；定位顺序：
@@ -55,6 +55,7 @@ const DSH_PACKAGES = {
   "dsh-storage-domain": "packages/storage/storage-domain",
 };
 
+/** 定位宿主工作树，显式路径无效时抛出错误。 */
 function findKongmingOs() {
   if (process.env.KONGMING_OS_DIR) {
     const root = resolve(process.env.KONGMING_OS_DIR);
@@ -70,6 +71,17 @@ function findKongmingOs() {
     if (dirname(dir) === dir) break; // 文件系统根
   }
   return null;
+}
+
+/** 定位已构建的会话互通库，缺失时给出构建提示。 */
+function findSessionKit(kongmingOs) {
+  const root = process.env.SESSION_KIT_DIR
+    ? resolve(process.env.SESSION_KIT_DIR)
+    : join(dirname(kongmingOs), "kmh-plugin", "kmh-session-kit");
+  if (!existsSync(join(root, "lib/src/index.js"))) {
+    throw new Error(`未找到 ${root}/lib/src/index.js，请先构建 kmh-session-kit 或设置 SESSION_KIT_DIR`);
+  }
+  return root;
 }
 
 /** 幂等建链：已是正确目标则跳过，指向错误（如搬迁后悬空）则替换。 */
@@ -101,6 +113,9 @@ if (!kongmingOs) {
 }
 console.log("kongming-os ->", kongmingOs);
 
+const sessionKit = findSessionKit(kongmingOs);
+await mkdir(join(pkgDir, "node_modules/@kmh"), { recursive: true });
+await ensureLink(join(pkgDir, "node_modules/@kmh/session-kit"), sessionKit);
 await mkdir(join(pkgDir, "node_modules/@deepseek-ai"), { recursive: true });
 for (const [name, relPath] of Object.entries(DSH_PACKAGES)) {
   const source = join(kongmingOs, "third_party/dsh", relPath);
