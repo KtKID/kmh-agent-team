@@ -1,6 +1,6 @@
 /**
- * 孔明会话军机阁工具集测试：junji_send 发送、错误路径与挂载释放（fake ctx/runtime，
- * sendAndWatch 走 session-kit 真函数）。
+ * 孔明会话军机阁工具集测试：发送、删除审批与挂载释放。
+ * 宿主和军机阁运行时用替身，sendAndWatch 走 session-kit 真函数。
  */
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -13,6 +13,10 @@ function makeCtx() {
   const ctx = {
     /** 目标会话表：sessionId → fake 大臣 Agent（resolveAgent 查这里）。 */
     targets: new Map(),
+    services: new Map(),
+    get(name) {
+      return ctx.services.get(name);
+    },
     on(event, handler) {
       const list = handlers.get(event) ?? [];
       list.push(handler);
@@ -130,6 +134,130 @@ test("tool_registered：工具集包含 junji_send", async () => {
   assert.ok(definition, "应注册 junji_send");
   assert.match(definition.description, /Junji/i);
 });
+
+for (const scenario of [
+  {
+    label: "完全权限：会话覆盖关闭询问",
+    mode: "danger-full-access",
+    override: "never",
+    policy: "ask",
+    decision: "rejected",
+    requests: 0,
+    removed: true,
+  },
+  {
+    label: "完全权限：宿主默认关闭询问",
+    mode: "danger-full-access",
+    policy: "never",
+    decision: "rejected",
+    requests: 0,
+    removed: true,
+  },
+  {
+    label: "完整访问但会话开启询问",
+    mode: "danger-full-access",
+    override: "ask",
+    policy: "never",
+    decision: "allowed-once",
+    requests: 1,
+    removed: true,
+  },
+  {
+    label: "请求审批：工作区模式收到单次批准",
+    mode: "workspace-write",
+    decision: "allowed-once",
+    requests: 1,
+    removed: true,
+  },
+  {
+    label: "帮我审批：工作区模式关闭询问",
+    mode: "workspace-write",
+    policy: "never",
+    decision: "rejected",
+    requests: 1,
+  },
+  {
+    label: "仅有完整访问模式，审批服务缺失",
+    mode: "danger-full-access",
+    requests: 0,
+  },
+  {
+    label: "仅有关闭询问策略，访问模式服务缺失",
+    policy: "never",
+    decision: "rejected",
+    requests: 1,
+  },
+  ...["rejected", "cancelled", "unavailable"].map((decision) => ({
+    label: `单次审批结果 ${decision}`,
+    mode: "workspace-write",
+    decision,
+    requests: 1,
+  })),
+  {
+    label: "等待审批时取消执行",
+    mode: "workspace-write",
+    decision: "allowed-once",
+    abort: true,
+    requests: 1,
+  },
+]) {
+  test(`junji_remove_agent：${scenario.label}`, async (t) => {
+    const runtime = makeRuntime(makeAgent("junji-session"));
+    const remove = t.mock.fn(async () => {});
+    runtime.remove = remove;
+    const { ctx, kongming, defs, exec } = await mount(runtime);
+    const controller = new AbortController();
+    const request = t.mock.fn(async ({ agent, toolName, callId }) => {
+      assert.equal(agent, kongming);
+      assert.equal(toolName, "junji_remove_agent");
+      assert.equal(callId, exec.callId);
+      if (scenario.abort) controller.abort();
+      return scenario.decision;
+    });
+    if (scenario.decision !== undefined) {
+      ctx.services.set("approval", {
+        config: { policy: scenario.policy },
+        overrideOf(session) {
+          assert.equal(session, kongming.session);
+          return scenario.override;
+        },
+        request,
+      });
+    }
+    if (scenario.mode !== undefined) {
+      ctx.services.set("sandboxPolicy", {
+        resolve({ session }) {
+          assert.equal(session, kongming.session);
+          return { mode: scenario.mode };
+        },
+      });
+    }
+    const result = execTool(
+      defs,
+      "junji_remove_agent",
+      { agentId: "司马懿" },
+      { ...exec, signal: controller.signal },
+    );
+    if (scenario.removed) {
+      assert.deepEqual(JSON.parse(await result), {
+        removed: true,
+        agentId: "司马懿",
+      });
+      assert.equal(remove.mock.callCount(), 1);
+      assert.deepEqual(remove.mock.calls[0].arguments, [
+        "司马懿",
+        runtime.list()[0],
+      ]);
+    } else {
+      await assert.rejects(
+        result,
+        scenario.abort ? { name: "AbortError" } : /删除大臣需要用户确认/,
+      );
+      assert.equal(remove.mock.callCount(), 0);
+    }
+    assert.equal(request.mock.callCount(), scenario.requests);
+  });
+}
 
 test("send_happy_path：就绪会话后投递 kmh-relay 消息并返回回执", async () => {
   const target = makeAgent("junji-session");

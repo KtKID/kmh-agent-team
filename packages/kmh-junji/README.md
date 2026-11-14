@@ -47,7 +47,7 @@
 - `junji_create_agent` / `junji_update_agent` — 创建 / 改名、改提示词、改模型
 - `junji_open_agent` — 准备某大臣的专属会话并返回 sessionId
 - `junji_send` — 给指定大臣的专属会话发消息，回复自动回到孔明会话
-- `junji_remove_agent` — 用户批准后停止成员的会话任务，归档会话，再删除档案与记忆。归档保留聊天历史。
+- `junji_remove_agent` — 孔明会话设为完全权限时直接执行，其他模式按宿主规则取得单次批准后执行。停止成员的会话任务，归档会话，再删除档案与记忆。归档保留聊天历史。
 
 ## 模块导出
 

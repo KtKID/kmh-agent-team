@@ -12,11 +12,16 @@ import {
 } from "@deepseek-ai/dsh-agent-loop-testkit";
 import { createUserMessage, LlmAdapter } from "@deepseek-ai/dsh-llm";
 import { SessionId } from "@deepseek-ai/dsh-session";
+import SandboxPolicy, { setSandboxMode } from "@deepseek-ai/dsh-sandbox-policy";
 import * as Persistence from "@deepseek-ai/dsh-session-persistence-jsonl";
 import Storage from "@deepseek-ai/dsh-storage";
 import * as StorageDomain from "@deepseek-ai/dsh-storage-domain";
 import * as StorageJson from "@deepseek-ai/dsh-storage-json";
+import ApprovalService, {
+  setApprovalPolicy,
+} from "@deepseek-ai/dsh-user-approval";
 import Workspaces from "@deepseek-ai/dsh-workspace";
+import { mountKongmingTools } from "../lib/src/kongming-integration.js";
 import { JunjiRuntime } from "../lib/src/runtime.js";
 import { AgentStore } from "../lib/src/registry.js";
 import { MemoryConfig } from "../lib/src/memory/config.js";
@@ -191,4 +196,54 @@ test("T3：归档失败时保留档案，重试成功后移除", options, async 
   await runtime.remove(record.id);
   assert.deepEqual(ctx.workspaceRegistry.archivedSessionIds, [sessionId]);
   assert.deepEqual(runtime.list(), []);
+});
+
+test("孔明切换为完全权限后直接删除并归档", options, async (t) => {
+  const host = await fixture(t);
+  const { ctx, driver, runtime, store } = host;
+  await ctx.plugin(ApprovalService, { policy: "ask" });
+  await ctx.plugin(SandboxPolicy, { mode: "workspace-write" });
+  const { record, agent, sessionId } = await addMember(host);
+  const kongming = await driver.create(SessionId("kongming"), model, {
+    cwd: store.root,
+  });
+  ctx.on("kongming/visit-agents", (visit) => visit(kongming));
+  await mountKongmingTools(ctx, runtime);
+  const toolName = "junji_remove_agent";
+  const tool = ctx.tools.get(toolName, kongming);
+  assert.ok(tool);
+  assert.equal(ctx.tools.get(toolName, agent), undefined);
+  const remove = (callId) =>
+    tool.execute(
+      { agentId: record.id },
+      { agent: kongming, callId, signal: new AbortController().signal },
+    );
+  const session = kongming.session;
+  setApprovalPolicy(session, "never");
+  session.append("turn/start", { turn: 1 });
+  await assert.rejects(remove("restricted"), /删除大臣需要用户确认/);
+  assert.deepEqual(ctx.workspaceRegistry.archivedSessionIds, []);
+  assert.deepEqual(
+    runtime.list().map((item) => item.id),
+    [record.id],
+  );
+  session.append("turn/end", { turn: 1, reason: { kind: "completed" } });
+
+  setSandboxMode(session, "danger-full-access");
+  session.append("turn/start", { turn: 2 });
+  const result = await remove("full-access");
+  session.append("turn/end", { turn: 2, reason: { kind: "completed" } });
+
+  assert.deepEqual(JSON.parse(result), { removed: true, agentId: record.id });
+  assert.deepEqual(ctx.workspaceRegistry.archivedSessionIds, [sessionId]);
+  assert.equal(ctx.sessions.get(sessionId), agent.session);
+  assert.deepEqual(runtime.list(), []);
+  await assert.rejects(store.read(record.id), { code: "ENOENT" });
+  const requests = session
+    .snapshotEvents()
+    .filter((event) => event.type === "approval/asked");
+  assert.deepEqual(
+    requests.map((event) => event.data.callId),
+    ["restricted"],
+  );
 });

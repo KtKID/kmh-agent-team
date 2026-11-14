@@ -1,6 +1,7 @@
 /** 两个插件都启用时，为孔明的固定会话挂载军机阁工具和提示词。 */
 import type { Context } from "@deepseek-ai/cordis";
 import type { Agent } from "@deepseek-ai/dsh-agent";
+import type {} from "@deepseek-ai/dsh-sandbox-policy";
 import type { ToolDefinition, ToolRunContext } from "@deepseek-ai/dsh-tools";
 import type {} from "@deepseek-ai/dsh-user-approval";
 import { sendAndWatch } from "@kmh/session-kit";
@@ -100,21 +101,30 @@ function definitions(
     ),
     tool(
       "junji_remove_agent",
-      "Request user approval to stop and archive a Junji Agent's session, then delete its profile and memory. The archived session retains its history.",
+      "Stop and archive a Junji Agent's session, then delete its profile and memory. Requires full access or one-time user approval. The archived session retains its history.",
       AgentInput,
       async ({ agentId }, { callId, signal }) => {
         const record = runtime.list().find(({ id }) => id === agentId);
         if (record === undefined)
           throw Error(`军机阁没有名为 ${agentId} 的大臣`);
-        const decision = await ctx.get("approval")?.request({
-          agent: source,
-          toolName: "junji_remove_agent",
-          callId,
-          reason: `停止并归档军机阁大臣「${record.name}」（${agentId}）的会话，删除其档案和记忆，保留会话历史。`,
-          signal,
-        });
+        const approval = ctx.get("approval");
+        const session = source.session;
+        const policy = approval?.overrideOf(session) ?? approval?.config.policy;
+        const fullAccess =
+          policy === "never" &&
+          ctx.get("sandboxPolicy")?.resolve({ session }).mode ===
+            "danger-full-access";
+        const allowed =
+          fullAccess ||
+          (await approval?.request({
+            agent: source,
+            toolName: "junji_remove_agent",
+            callId,
+            reason: `停止并归档军机阁大臣「${record.name}」（${agentId}）的会话，删除其档案和记忆，保留会话历史。`,
+            signal,
+          })) === "allowed-once";
         signal.throwIfAborted();
-        if (decision !== "allowed-once") throw Error("删除大臣需要用户确认");
+        if (!allowed) throw Error("删除大臣需要用户确认");
         await runtime.remove(agentId, record);
         return { removed: true, agentId };
       },

@@ -30,6 +30,7 @@ const DSH_PACKAGES = {
   "dsh-system-prompt": "packages/core/system-prompt",
   "dsh-tools": "packages/core/tools",
   "dsh-user-approval": "packages/interaction/user-approval",
+  "dsh-sandbox-policy": "packages/sandbox/sandbox-policy",
   "dsh-workspace": "packages/workspace/workspace",
   "dsh-client-connection": "packages/client/connection",
   "dsh-api-session-controller": "packages/api/session-controller",

@@ -68,6 +68,7 @@ $DSH_HOME/agent-team/
   2. 初始化 MEMORY.md（空文件 0600）与 MEMORY.frozen.md（首次发布：原始为空时保留已有冻结/发布空冻结——沿用 kongming-memory-v1 initializeMemoryFiles 语义）；
   3. 创建专属 DSH session（persona=systemPrompt、model=model），回写 sessionId。
 - `remove(id)`：按成员绑定的会话 ID 打断运行中的任务，清理活动会话的待处理输入，等待该轮结束后调用宿主归档，再移除成员档案和记忆。会话历史随归档保留；取消归档只恢复会话。宿主归档失败时保留成员档案供重试。
+- 孔明通过 `junji_remove_agent` 删除大臣时，按孔明会话当前的授权执行。完全权限下直接删除，其他模式按宿主规则请求单次批准。审批拒绝、取消或不可用时停止操作。
 - `update(id, { name?, systemPrompt?, model? })`：写 agent.json；systemPrompt/model 变更只影响后续请求（persona 装配是每次请求时进行）。
 
 ### 4.2 Agent↔Session 一对一绑定（session/）
@@ -144,5 +145,6 @@ $DSH_HOME/agent-team/
 
 ## 变更记录
 
+- 2026-11-14 · 修改 §4.1 孔明删除大臣 · 支持完全权限下直接删除 · [任务记录](task/task-remove-agent-full-access.md)
 - 2026-11-11 · 修改 §4.1、§5 删除大臣 · 停止任务并归档会话 · [任务记录](task/task-remove-agent-archive.md)
 - 2026-11-06 · 修改 §5 模型下拉 · 增加箭头右侧留白 · [任务记录](task/task-model-select-chevron.md) · 60000 已复验样式
