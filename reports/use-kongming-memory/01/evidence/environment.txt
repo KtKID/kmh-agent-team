@@ -1,0 +1,6 @@
+2026-11-14 17:15:14 +0800
+v25.6.1
+60080 healthy；容器 /opt/kmh/packages/kmh-junji/lib/src/runtime.js 含 ./memory/index.js，且同目录 shared-memory.js 缺失。
+按工作区 AGENTS.md 保留现有环境，等待加载待验收版本。
+军机阁 lint 入口：eslint src --max-warnings 0
+结果：sh: eslint: command not found（退出码 1）

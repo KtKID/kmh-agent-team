@@ -1,0 +1,10 @@
+memory/src/agent.ts | 87 / 87 | 19 / 25 | lines - | branches 33.4.0,41.10.0,54.15.0,56.16.0,66.18.0,49.24.0
+memory/src/config.ts | 21 / 21 | 1 / 1 | lines - | branches -
+memory/src/files.ts | 8 / 8 | 1 / 2 | lines - | branches 29.5.0
+memory/src/index.ts | 8 / 8 | 1 / 1 | lines - | branches -
+memory/src/prompt.ts | 1 / 1 | 0 / 0 | lines - | branches -
+memory/src/steer.ts | 3 / 3 | 2 / 2 | lines - | branches -
+memory/src/tool.ts | 6 / 6 | 1 / 2 | lines - | branches 22.4.0
+junji/src/index.ts | 1 / 1 | 0 / 0 | lines - | branches -
+junji/src/runtime.ts | 37 / 49 | 7 / 10 | lines 64,238,250,304,305,306,342,343,344,345,346,361 | branches 60.5.0,313.33.0,341.39.0
+total (each independently reportable source line/branch, build scripts excluded) 172 184 32 43

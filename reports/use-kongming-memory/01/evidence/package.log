@@ -1,0 +1,35 @@
+📦  @kmh/kmh-junji@0.1.1
+Tarball Contents
+cordis.patch.yml
+icon.png
+lib/browser-types/src/client/AgentForm.d.ts
+lib/browser-types/src/client/index.d.ts
+lib/browser-types/src/client/JunjiPanel.d.ts
+lib/browser-types/src/client/locales.d.ts
+lib/browser-types/src/client/transport.d.ts
+lib/browser-types/src/protocol/index.d.ts
+lib/client.js
+lib/src/index.d.ts
+lib/src/index.js
+lib/src/kongming-integration.d.ts
+lib/src/kongming-integration.js
+lib/src/paths.d.ts
+lib/src/paths.js
+lib/src/prompt.d.ts
+lib/src/prompt.js
+lib/src/protocol/index.d.ts
+lib/src/protocol/index.js
+lib/src/registry.d.ts
+lib/src/registry.js
+lib/src/runtime.d.ts
+lib/src/runtime.js
+lib/src/shared-memory.d.ts
+lib/src/shared-memory.js
+lib/src/web.d.ts
+lib/src/web.js
+LICENSE
+package.json
+README.md
+Tarball Details
+/private/tmp/junji-shared-memory.x5sQjp/kmh-junji.tgz
+发行包入口可加载；默认提醒使用共享保存工具；旧目录已移除。

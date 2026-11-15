@@ -7,14 +7,14 @@ import { SessionId } from "@deepseek-ai/dsh-session";
 import { WorkspaceUnknownSessionError } from "@deepseek-ai/dsh-workspace";
 import type { Workspace } from "@deepseek-ai/dsh-workspace/types";
 import type {} from "@deepseek-ai/dsh-api-session-controller";
+import type { Config as MemoryConfig } from "./index.ts";
 import { AgentStore } from "./registry.ts";
 import { mountAgentPrompt } from "./prompt.ts";
 import {
-  createAgentMemory,
-  resolveMemoryFiles,
-  type AgentMemory,
-  type MemoryConfig,
-} from "./memory/index.ts";
+  createAgentMemoryService,
+  resolveDirectoryMemoryFiles,
+  type KongmingMemoryV1,
+} from "./shared-memory.ts";
 import type {
   AgentCreated,
   AgentModel,
@@ -31,8 +31,11 @@ export class JunjiRuntime {
   private readonly records = new Map<string, AgentRecord>();
   private readonly prompts = new Map<string, () => void>();
   private readonly liveAgents = new Map<string, Agent>();
-  private readonly memories = new Map<string, AgentMemory>();
-  private readonly memoryReleases = new Map<string, () => Promise<void>>();
+  private readonly memories = new Map<string, KongmingMemoryV1>();
+  private readonly memoryBindings = new Map<
+    string,
+    { agent: Agent; ready: Promise<void>; release: () => Promise<void> }
+  >();
   private canonicalRoot: string | undefined;
   private workspace: Workspace | undefined;
   private closed = false;
@@ -54,11 +57,11 @@ export class JunjiRuntime {
     ctx.on("agent/created", ({ agent }) => {
       if (this.closed) return;
       const record = this.recordBySession(agent.id);
-      if (record !== undefined) this.bindPrompt(record, agent);
+      if (record !== undefined) this.observeBinding(record, agent);
     });
     // DSH emit 调度会接管异步清理观察器的拒绝。
     ctx.on("agent/disposed", ({ agent }) => {
-      this.releasePrompt(agent.id);
+      if (this.liveAgents.get(agent.id) === agent) this.releasePrompt(agent.id);
     });
     ctx.effect(() => () => this.close(), "kmh-junji: settle runtime");
   }
@@ -73,7 +76,7 @@ export class JunjiRuntime {
     for (const record of records) {
       this.records.set(record.id, record);
       const live = this.ctx.agents.get(SessionId(record.sessionId));
-      if (live !== undefined) this.bindPrompt(record, live);
+      if (live !== undefined) this.observeBinding(record, live);
     }
   }
 
@@ -232,7 +235,7 @@ export class JunjiRuntime {
     validated?: ModelSelection,
   ): Promise<AgentRecord> {
     if (record.phase === "ready") {
-      this.bindPrompt(record, await this.resolveAgent(record));
+      await this.bindPrompt(record, await this.resolveAgent(record));
       return record;
     }
     const selection = validated ?? (await this.resolveModel(record.model));
@@ -244,7 +247,7 @@ export class JunjiRuntime {
     if (created.sessionId !== SessionId(record.sessionId))
       throw Error("军机阁会话创建返回了不同的会话，已拒绝绑定");
     const agent = await this.resolveAgent(record);
-    this.bindPrompt(record, agent);
+    await this.bindPrompt(record, agent);
     agent.model.select(selection);
     await this.ctx.sessionController.rename({
       sessionId: SessionId(record.sessionId),
@@ -295,31 +298,53 @@ export class JunjiRuntime {
     return undefined;
   }
 
-  private bindPrompt(record: AgentRecord, agent: Agent): void {
+  /** 恢复路径在后台开始绑定，失败由日志记录，后续打开可重试。 */
+  private observeBinding(record: AgentRecord, agent: Agent): void {
+    void this.bindPrompt(record, agent).catch((error: unknown) => {
+      this.ctx.logger.warn(
+        `军机阁记忆绑定失败 ${record.id}：${String(error)}`,
+      );
+    });
+  }
+
+  private async bindPrompt(record: AgentRecord, agent: Agent): Promise<void> {
+    const previous = this.liveAgents.get(record.sessionId);
+    if (previous !== undefined && previous !== agent)
+      this.releasePrompt(agent.id);
     this.liveAgents.set(record.sessionId, agent);
     if (!this.prompts.has(record.sessionId))
       this.prompts.set(
         record.sessionId,
         mountAgentPrompt(agent, record.systemPrompt),
       );
-    void this.bindMemory(record, agent);
+    await this.bindMemory(record, agent);
   }
 
   /** 记忆绑定：创建或复用该 agent 的记忆服务，初始化文件（创建时加载）并挂全部监听。 */
   private async bindMemory(record: AgentRecord, agent: Agent): Promise<void> {
-    if (this.memoryReleases.has(record.sessionId)) return;
-    let memory = this.memories.get(record.sessionId);
+    const { sessionId } = record;
+    const existing = this.memoryBindings.get(sessionId);
+    if (existing?.agent === agent) return existing.ready;
+    let memory = this.memories.get(sessionId);
     if (memory === undefined) {
-      memory = createAgentMemory(
-        this.ctx,
-        resolveMemoryFiles(this.store.dir(record.id)),
+      memory = createAgentMemoryService(
+        resolveDirectoryMemoryFiles(this.store.dir(record.id)),
         this.memoryConfig,
       );
-      this.memories.set(record.sessionId, memory);
+      this.memories.set(sessionId, memory);
     }
-    const release = await memory.bindAgent(agent);
-    this.memoryReleases.set(record.sessionId, release);
-    await memory.initialize();
+    const release = memory.bindAgent(agent);
+    const binding = { agent, ready: memory.initialize(), release };
+    this.memoryBindings.set(sessionId, binding);
+    try {
+      await binding.ready;
+    } catch (error: unknown) {
+      if (this.memoryBindings.get(sessionId) === binding) {
+        this.memoryBindings.delete(sessionId);
+        await release();
+      }
+      throw error;
+    }
   }
 
   /** 释放某会话的提示词段、记忆绑定与存活引用；记忆服务保留供重新绑定。 */
@@ -329,10 +354,12 @@ export class JunjiRuntime {
     this.prompts.delete(sessionId);
     this.liveAgents.delete(sessionId);
     release();
-    const releaseMemory = this.memoryReleases.get(sessionId);
-    if (releaseMemory !== undefined) {
-      this.memoryReleases.delete(sessionId);
-      void releaseMemory();
+    const memory = this.memoryBindings.get(sessionId);
+    if (memory !== undefined) {
+      this.memoryBindings.delete(sessionId);
+      void memory.release().catch((error: unknown) => {
+        this.ctx.logger.warn(`军机阁记忆释放失败：${String(error)}`);
+      });
     }
   }
 

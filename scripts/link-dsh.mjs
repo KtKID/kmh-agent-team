@@ -1,5 +1,5 @@
 /**
- * 定位 kongming-os 和 session-kit，把构建所需依赖链接进包内 node_modules。
+ * 定位 kongming-os、session-kit 和孔明记忆，把构建依赖链接进包内 node_modules。
  *
  * 不在 devDependencies 里写死 `link:` 相对路径（仓库相对 kongming-os 的位置
  * 不稳定：可能是兄弟目录，也可能嵌套在 kongming-os/packages/ 下）；定位顺序：
@@ -84,6 +84,17 @@ function findSessionKit(kongmingOs) {
   return root;
 }
 
+/** 定位相邻的孔明记忆源码，缺失时报告应准备的工作树。 */
+function findKongmingMemory() {
+  const root = join(repoRoot, "../kmh-kongming/packages/kongming-memory");
+  if (!existsSync(join(root, "src/agent.ts"))) {
+    throw new Error(
+      `未找到 ${root}/src/agent.ts，请准备相邻的 kmh-kongming 工作树`,
+    );
+  }
+  return root;
+}
+
 /** 幂等建链：已是正确目标则跳过，指向错误（如搬迁后悬空）则替换。 */
 async function ensureLink(target, source) {
   let stat;
@@ -114,8 +125,10 @@ if (!kongmingOs) {
 console.log("kongming-os ->", kongmingOs);
 
 const sessionKit = findSessionKit(kongmingOs);
+const memory = findKongmingMemory();
 await mkdir(join(pkgDir, "node_modules/@kmh"), { recursive: true });
 await ensureLink(join(pkgDir, "node_modules/@kmh/session-kit"), sessionKit);
+await ensureLink(join(pkgDir, "node_modules/@kmh/kongming-memory-v1"), memory);
 await mkdir(join(pkgDir, "node_modules/@deepseek-ai"), { recursive: true });
 for (const [name, relPath] of Object.entries(DSH_PACKAGES)) {
   const source = join(kongmingOs, "third_party/dsh", relPath);

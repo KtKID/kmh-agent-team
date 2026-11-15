@@ -1,0 +1,59 @@
+
+> @kmh/kongming-memory-v1@0.1.0 typecheck <项目目录>/kmh-plugin/kmh-kongming/packages/kongming-memory
+> tsc -p tsconfig.json --noEmit
+
+
+> @kmh/kongming-memory-v1@0.1.0 lint <项目目录>/kmh-plugin/kmh-kongming/packages/kongming-memory
+> eslint src build.ts test --max-warnings 0
+
+
+> @kmh/kongming-memory-v1@0.1.0 build <项目目录>/kmh-plugin/kmh-kongming/packages/kongming-memory
+> node build.ts
+
+✔ M01 / F01：空目录生成两份空文件并在实际请求中加载 (165.451042ms)
+✔ M02 / F01：首次完整复制 raw，保留中文、空行、换行和花括号 (99.827958ms)
+✔ M03 / F01：已有冻结 A 时启动用原始 B 重发，raw B 保留 (62.325542ms)
+✔ M04 / F02：raw 日常修改后连续请求仍使用冻结版本 (65.670792ms)
+✔ M05 / F03：重建独立记忆服务后按原始 B 重发并保留会话身份 (65.997875ms)
+✔ M06 / F04：两次真实手动压缩后第一条请求分别使用新冻结 B、C (78.418666ms)
+✔ M07 / F01：出生为空的冻结在启动时由原始 A 自愈重发 (39.688083ms)
+✔ M08 / F01：原始为空时保留已有冻结 A 不回退 (35.710083ms)
+✔ T01 / reminder_guides_tool_append：收尾提醒含工具名，模型经保存工具追加且冻结不变 (101.331083ms)
+✔ T02 / blank_entry_rejected：空白条目返回工具错误，原始文件保持原样 (81.636ms)
+✔ T03 / separator_and_serialized：无结尾换行补分隔，并发追加按入队顺序落盘 (26.676792ms)
+✔ T04 / ordinary_agent_cannot_save：普通 Agent 调用同名工具失败且文件不变 (105.423167ms)
+✔ P05：记忆模板由配置决定，路径和完整冻结正文只替换一次 (74.11925ms)
+✔ P06：模板缺少路径或冻结正文变量、为空或类型错误时校验失败 (0.389208ms)
+✔ R01 / S01/S02/S04：系统只加载记忆上下文，任务收尾后同轮提醒并经保存工具追加条目 (105.960708ms)
+✔ R02 / S05：每轮各提醒一次，普通 Agent 保持独立 (78.169833ms)
+✔ R03 / S06：max-tokens 事实保持整轮，下一正常轮恢复提醒 (63.400208ms)
+✔ R04 / S07：模型异常与用户取消均按实际结果结束并保持零提醒 (134.186916ms)
+✔ R05 / S11：提醒进入队列后重建服务，既有证据阻止同轮重复提醒 (56.22675ms)
+✔ R07：同轮已有军机阁旧提醒时，共享记忆不会重复注入 (47.801042ms)
+✔ R06：空配置停用提醒，自定义配置只经 steer 送达 (70.589791ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 812.784875
+ℹ start of coverage report
+ℹ ---------------------------------------------------------------------------
+ℹ file           | line % | branch % | funcs % | uncovered lines
+ℹ ---------------------------------------------------------------------------
+ℹ src            |        |          |         |
+ℹ  agent.ts      | 100.00 |    76.00 |  100.00 |
+ℹ  compaction.ts | 100.00 |    90.48 |  100.00 |
+ℹ  config.ts     | 100.00 |   100.00 |  100.00 |
+ℹ  files.ts      |  88.89 |    74.19 |  100.00 | 76-79 88-91 102-105 137-140
+ℹ  index.ts      |  88.37 |   100.00 |   80.00 | 23-27
+ℹ  kongming.ts   |  75.00 |    80.00 |   33.33 | 19-25 28-33 43
+ℹ  prompt.ts     |  98.59 |    82.35 |   85.71 | 64
+ℹ  steer.ts      | 100.00 |    96.77 |  100.00 |
+ℹ  tool.ts       | 100.00 |    88.89 |  100.00 |
+ℹ ---------------------------------------------------------------------------
+ℹ all files      |  94.62 |    84.83 |   88.57 |
+ℹ ---------------------------------------------------------------------------
+ℹ end of coverage report

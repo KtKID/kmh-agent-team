@@ -1,0 +1,20 @@
+Junji baseline adb45c32b2a3463e250b9cf5e962e3c43c361d85
+Kongming baseline e83cd411c4f4ccab73a3bc6aff49eb1375fbaa03
+09b68f50a358d170aa841c0bfbda3ddf9dbe630a0149b2742534aa451456e508  packages/kmh-junji/build.mjs
+87e8b72054f308b5b316b33bf4b151582a62d5a49c574d2d166da698703832f6  packages/kmh-junji/tsconfig.host.json
+b5c143fa0d829152a134940a09aee23f6b28d09b5b77ff9f2697b5fc0c0bdbb2  packages/kmh-junji/src/index.ts
+fd419de2ee905ba7b4fc47fd1099261b00bee69ada4cc9690ef5bbe64962652d  packages/kmh-junji/src/runtime.ts
+35bff3488bfbba27609f3b868a02cdfbc11c1b14267bba26d063118b0cb339a5  packages/kmh-junji/src/shared-memory.ts
+b18ca0768438a6a379aed3c76ecfc0530f80308f3322a1d1872c9b11b117c884  packages/kmh-junji/test/remove-agent.test.mjs
+c8d4b8f35e07695146c9f751c121ef274fe9b39a9bb3abb9c96aafed83e82ea6  scripts/link-dsh.mjs
+4ff21a73d7f26e5f0d4e9025873729fea94b1cb5814beb4a1dfb0f26410bebb0  ../kmh-kongming/packages/kongming-memory/package.json
+9c770fbab2ea6c4a9145143f57523ea423a29f0a5e2457f30169c3f990f2afda  ../kmh-kongming/packages/kongming-memory/src/agent.ts
+4fda65ec2ed8cbd8c030dc45890879553795d87098b8b92af98295b34d4a9ba5  ../kmh-kongming/packages/kongming-memory/src/config.ts
+afcb9b301b1dcd56bf88acc87e3bf204e99e2bedaabc98b0b2ccf56ce585b4cb  ../kmh-kongming/packages/kongming-memory/src/files.ts
+5691a11bd2ee4a0b1bf054ef2773534bcb8d1a1b0451452f87803cad44f37ea4  ../kmh-kongming/packages/kongming-memory/src/index.ts
+728ee4c3abca4533ad6b1002036d1c0185de96151cbfa9e578af844a30ec10c0  ../kmh-kongming/packages/kongming-memory/src/prompt.ts
+5adcd56367a82555878753c970a0e77aff3de19398f4fdb41ad0d05cc4c45869  ../kmh-kongming/packages/kongming-memory/src/steer.ts
+b6c28c52288242b05e69812020c5c9c1a8af3b7a53ff83b053afceb37661e85e  ../kmh-kongming/packages/kongming-memory/src/tool.ts
+8e08f1b63e97538a1902bd57184e1b149b57c8af4f6994bfc5a51e2c383cf206  ../kmh-kongming/packages/kongming-memory/src/types.ts
+d3e2c912759303cb81be30616a8112623317ce9f09a0ef33cb4858c3de455d7a  ../kmh-kongming/packages/kongming-memory/test/turn-reminder.test.ts
+69d90934a1dea6649bf56eae6ed1673eb1bea69ecbbacac07238979fd0d245b1  ../kmh-kongming/packages/kongming/cordis.patch.yml

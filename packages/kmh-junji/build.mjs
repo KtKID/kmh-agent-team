@@ -1,6 +1,7 @@
 /** 单次构建 Host 与 Client，保留已有产物并写入更新，供 DSH HMR 检测变化。 */
 import { build } from "esbuild";
 import { execFileSync } from "node:child_process";
+import { rm } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 const require = createRequire(import.meta.url);
@@ -36,5 +37,19 @@ const options = {
 execFileSync(process.execPath, [require.resolve("typescript/bin/tsc"), "-b"], {
   cwd: options.absWorkingDir,
   stdio: "inherit",
+});
+await build({
+  absWorkingDir: options.absWorkingDir,
+  entryPoints: ["src/shared-memory.ts"],
+  outfile: "lib/src/shared-memory.js",
+  bundle: true,
+  platform: "node",
+  target: "node24",
+  format: "esm",
+  external: ["@deepseek-ai/*"],
+});
+await rm(new URL("lib/src/memory", import.meta.url), {
+  recursive: true,
+  force: true,
 });
 await build(options);

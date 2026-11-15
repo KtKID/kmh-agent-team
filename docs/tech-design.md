@@ -9,7 +9,7 @@
 
 1. 用户可创建多个 agent（孔明的"大臣"），每个 agent 是持久实体。
 2. 每个 agent 与一个 DSH session **一对一永久绑定**，创建后不换 session。
-3. 每个 agent 有独立的记忆小本子（memory）：创建 agent 时加载、触发压缩时加载，agent 自己通过通用文件工具读写。
+3. 每个 Agent 使用自己的原始与冻结记忆文件。任务收尾可通过记忆插件的保存工具追加长期条目，手动压缩成功后刷新冻结。
 4. 记忆机制**复用 `@kmh/kongming-memory-v1` 插件**（原始 MEMORY.md + 冻结 MEMORY.frozen.md 的双文件模式）。
 5. 每个 agent 独立目录，位于 `<home>/agent-team/<agentId>/`（home 为服务端 DSH home）。
 6. 每个 agent 的会话支持独立压缩（DSH compaction 本身 per-session，天然独立；记忆冻结随压缩刷新）。
@@ -30,7 +30,7 @@ kmh-agent-team/                                ← 独立仓库（本仓库）
   packages/kmh-junji/                          ← @kmh/kmh-junji 插件包
     src/index.ts            host 侧入口（Cordis 插件）
     src/registry/           agent 注册表（CRUD + 持久化）
-    src/memory/             per-agent 记忆机制（移植 kongming-memory-v1）
+    src/shared-memory.ts    引入孔明记忆插件的 Agent 接口
     src/session/            agent↔session 一对一绑定、persona/模型注入
     src/protocol/           client↔host 协议（zod）
     src/web.ts              client 插件注册（web platform）
@@ -50,7 +50,7 @@ kmh-agent-team/                                ← 独立仓库（本仓库）
 $DSH_HOME/agent-team/
   <agentId>/                 ← agentId：稳定 slug（创建时由名字生成，重名加 -2/-3）
     agent.json               ← { id, name, systemPrompt, model, sessionId, createdAt, updatedAt }
-    MEMORY.md                ← 原始记忆小本子（agent 自己用 read/write/edit 维护）
+    MEMORY.md                ← 原始记忆小本子（记忆保存工具追加）
     MEMORY.frozen.md         ← 冻结记忆（插件维护，装配时完整读取）
   registry.json              ← 索引（可选，agent 目录扫描亦可；一期直接扫目录 + agent.json）
 ```
@@ -75,30 +75,29 @@ $DSH_HOME/agent-team/
 
 - 创建 session 时以该 agent 的 persona（系统提示词）与模型实例化（实现路径二选一，Phase 1 研究定案）：
   - **路径 A**：host 服务调用 `dsh-agent-preset-registry` 动态注册一个 per-agent preset（内挂 `dsh-persona` 行，`complete: true` 用系统提示词整体作为身份），session 创建时选择该 preset；
-  - **路径 B**：不走 preset，junji 自己在 `system-prompt/assemble` 监听里按 session→agent 映射注入 persona 段（与 memory 注入同一监听，顺序：persona 在前、记忆在后）。
+  - **路径 B**：不走 preset，junji 自己在 `system-prompt/assemble` 监听里按 session→agent 映射注入 persona 段（记忆插件独立绑定系统提示词贡献）。
   - 初步倾向 B：避免 N 个动态 preset 的注册表膨胀，且与记忆注入同构；A 的优势是复用 preset 的 KV cache 稳定性，Phase 1 用证据定案。
 - 点击 agent → client 通过既有 session 切换 API 打开其 sessionId；session 不可被换成别人的。
 - 模型：创建面板选择的模型写入 agent.json，每次请求按此路由（复用 DSH 模型选择机制，Phase 1 确认 per-session model 的设置入口）。
 
-### 4.3 Per-agent 记忆（memory/，移植 kongming-memory-v1 机制）
+### 4.3 Per-agent 记忆
 
-移植 `packages/kongming-memory-v1/src` 的 files.ts / prompt.ts / steer.ts / compaction.ts 逻辑，参数化为 per-agent：
+军机阁用 `@kmh/kongming-memory-v1/agent` 为每个档案绑定自己的会话。`agent-team/<agentId>/` 里的两份记忆文件沿用已有路径与内容。
 
 | 时机 | 行为 | 来源插件对应 |
 |---|---|---|
 | agent 创建 / 插件装载扫到 agent | 补齐空 MEMORY.md；MEMORY.frozen.md 缺失时发布，已有且原始非空时完整重发；原始为空保留既有冻结 | `initializeMemoryFiles` |
 | 每次提示词装配 | 读完整冻结正文，经 promptTemplate（`{{originalMemoryPath}}` `{{frozenMemoryPath}}` `{{frozenMemory}}`）注入该 agent session 的系统提示词 | `system-prompt/assemble` 注入 |
-| 普通任务收尾 | `agent/turn-stopping` 事件 steer 一次提醒（每会话每轮最多一次，max-tokens 轮跳过），提示模型把有价值内容写进原始小本子 | steer.ts |
+| 普通任务收尾 | `agent/turn-stopping` 事件 steer 一次提醒（每会话每轮最多一次，max-tokens 轮跳过），提示模型借助 `kongming_memory_save` 向自己的原始文件追加长期条目 | steer.ts / tool.ts |
 | 手动 `/compact` 成功 | 核对压缩回执后，原始文件经临时文件原子替换发布为新冻结 | compaction.ts / `refreshFrozen(result)` |
 
-- 绑定模型：kongming-memory-v1 绑定的是 `kongming/agent-ready` 单 agent 事件；junji 改为对**注册表中全部 agent 的 session** 建立绑定（agent→session 1:1 映射使绑定简单：按 sessionId 过滤装配/收尾/压缩事件）。
-- 提醒文案与提示模板默认值沿用 kongming-memory-v1 的 cordis.patch.yml 文案（中文），做成 junji 的可配置项。
-- **满足需求中"创建时加载 + 压缩时加载"**：创建时 initialize+发布冻结；压缩成功时重发冻结；两次加载之间，装配每次都读冻结正文（与原插件一致）。
+- 绑定模型：军机阁按档案绑定成员的 Agent 实例；孔明由自己的会话事件绑定。每个记忆实例只接收该绑定的文件路径、请求和保存调用，普通会话保持原有行为。
+- 两边使用记忆插件的同一套默认模板和收尾文案。军机阁仍可在自己的插件配置中覆盖 `promptTemplate` 与 `reminderPrompt`。会话历史中的旧军机阁提醒仍作为同轮去重依据。
 
 ### 4.4 独立压缩
 
 - 每个 agent 独立 session ⇒ DSH compaction 天然 per-session 独立，无需额外开发。
-- junji 监听该 session 的压缩成功回执 → 刷新冻结记忆（4.3 表最后一行）。
+- 共享记忆监听绑定会话的手动压缩成功回执，刷新该 Agent 的冻结文件（§4.3）。
 - UI 不新增压缩按钮（沿用输入框 `/compact` 与自动压缩）；二期可加 agent 卡片上的"压缩并归档记忆"入口。
 
 ## 5. Client 侧设计
@@ -113,8 +112,8 @@ $DSH_HOME/agent-team/
 
 ## 6. 集成与加载
 
-1. `scripts/link-dsh.mjs` 为源码构建定位 DSH 与会话互通库。构建和类型检查会运行该脚本。默认使用 kongming-os 同级 `kmh-plugin/kmh-session-kit` 的构建产物，可用 `SESSION_KIT_DIR` 指定已构建的库，用 `KONGMING_OS_DIR` 指定宿主工作树。
-2. kongming-os 的 `kmh-web` profile 从子模块加载 `@kmh/kmh-junji`，实例由包内 `cordis.patch.yml` 登记。
+1. `scripts/link-dsh.mjs` 为源码构建定位 DSH、会话互通库及同级 `kmh-kongming` 的记忆插件源码。构建和类型检查会运行该脚本。默认使用 kongming-os 同级 `kmh-plugin/kmh-session-kit` 的构建产物，可用 `SESSION_KIT_DIR` 指定已构建的库，用 `KONGMING_OS_DIR` 指定宿主工作树。
+2. kongming-os 的 `kmh-web` profile 从子模块加载 `@kmh/kmh-junji`，实例由包内 `cordis.patch.yml` 登记。独立发行包内置由共享源码生成的记忆产物，DSH 依赖由宿主提供。
 
 ## 7. 分期计划
 
@@ -144,6 +143,8 @@ $DSH_HOME/agent-team/
 - **R4 工作区沙箱**：集成阶段需写 kongming-os（工作区外）与 `$DSH_HOME`，涉及审批；开发期全部产物落在本仓库。
 
 ## 变更记录
+
+- 2026-11-14 · 修改 §4.3 军机阁记忆 · 复用孔明记忆插件并沿用每个 Agent 的原文件 · [任务记录](task/task-use-kongming-memory.md)
 
 - 2026-11-14 · 修改 §4.1 孔明删除大臣 · 支持完全权限下直接删除 · [任务记录](task/task-remove-agent-full-access.md)
 - 2026-11-13 · 修改 §5 军机阁图标 · 插件管理页、侧栏和 README 接入军机阁图标 · [任务记录](task/task-junji-icon.md)

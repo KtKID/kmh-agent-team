@@ -1,0 +1,34 @@
+
+> @kmh/kmh-junji@0.1.1 build /private/tmp/junji-memory-baseline.hszCiw/packages/kmh-junji
+> node ../../scripts/link-dsh.mjs && node build.mjs
+
+kongming-os -> <项目目录>/kongming-os
+dsh peer links ok
+✖ 共享记忆按成员绑定原文件、收尾和保存工具，普通会话保持静默 (113.637459ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 277.774291
+
+✖ failing tests:
+
+test at test/remove-agent.test.mjs:120:1
+✖ 共享记忆按成员绑定原文件、收尾和保存工具，普通会话保持静默 (113.637459ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+    assert.ok(host.ctx.tools.get(saveTool, a.agent))
+
+      at TestContext.<anonymous> (file:///private/tmp/junji-memory-baseline.hszCiw/packages/kmh-junji/test/remove-agent.test.mjs:169:12)
+      at async Test.run (node:internal/test_runner/test:1125:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

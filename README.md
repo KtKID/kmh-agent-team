@@ -41,7 +41,7 @@ https://github.com/KtKID/kmh-agent-team/releases/latest/download/kmh-junji.tgz
 
 ## 从源码开发
 
-军机阁包名为 `@kmh/kmh-junji`。开发使用 Node.js 24.9+ 和 pnpm，需要本地 `kongming-os`（已初始化并构建 DSH）以及位于本仓库同级目录的 `kmh-session-kit`。先在 `kmh-session-kit` 安装依赖并运行 `pnpm build`，再在本仓库运行：
+军机阁包名为 `@kmh/kmh-junji`。开发使用 Node.js 24.9+ 和 pnpm，需要本地 `kongming-os`（已初始化并构建 DSH）以及相邻的 `kmh-session-kit` 和 `kmh-kongming` 工作树。军机阁从孔明记忆插件源码构建自己的发布产物。先在 `kmh-session-kit` 安装依赖并运行 `pnpm build`，再在本仓库运行：
 
 ```sh
 pnpm install

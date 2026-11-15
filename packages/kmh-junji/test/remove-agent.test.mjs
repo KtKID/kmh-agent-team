@@ -1,7 +1,7 @@
-/** 军机阁删除回归，运行真实宿主会话和归档，使用可中断的测试模型。 */
+/** 军机阁成员生命周期及记忆隔离回归，经真实宿主会话和持久化执行。 */
 import assert from "node:assert/strict";
 import { once } from "node:events";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -10,7 +10,11 @@ import {
   mountAgentLoopTestDependencies,
   mountAgentLoopTestHarness,
 } from "@deepseek-ai/dsh-agent-loop-testkit";
-import { createUserMessage, LlmAdapter } from "@deepseek-ai/dsh-llm";
+import {
+  createUserMessage,
+  LlmAdapter,
+  ToolCallId,
+} from "@deepseek-ai/dsh-llm";
 import { SessionId } from "@deepseek-ai/dsh-session";
 import SandboxPolicy, { setSandboxMode } from "@deepseek-ai/dsh-sandbox-policy";
 import * as Persistence from "@deepseek-ai/dsh-session-persistence-jsonl";
@@ -24,7 +28,7 @@ import Workspaces from "@deepseek-ai/dsh-workspace";
 import { mountKongmingTools } from "../lib/src/kongming-integration.js";
 import { JunjiRuntime } from "../lib/src/runtime.js";
 import { AgentStore } from "../lib/src/registry.js";
-import { MemoryConfig } from "../lib/src/memory/config.js";
+import { Config as MemoryConfig } from "../lib/src/index.js";
 
 const model = { provider: "mock", model: "mock" };
 const member = { name: "司马测试", systemPrompt: "测试专属会话", model };
@@ -59,12 +63,15 @@ function prompt(text) {
 }
 
 /** 在临时目录安装生产执行循环和 JSON 归档，注册清理并返回测试入口。 */
-async function fixture(t) {
+async function fixture(
+  t,
+  adapter = new BlockingAdapter(),
+  memoryConfig = { reminderPrompt: "" },
+) {
   const root = await mkdtemp(join(tmpdir(), "junji-removal-"));
   const ctx = new Context();
-  const adapter = new BlockingAdapter();
   t.after(async () => {
-    adapter.release.resolve();
+    adapter.release?.resolve();
     try {
       await ctx.fiber.dispose();
     } finally {
@@ -84,22 +91,134 @@ async function fixture(t) {
     ctx,
     store,
     store.root,
-    MemoryConfig({ reminderPrompt: "" }),
+    MemoryConfig(memoryConfig),
   );
   return { ctx, driver, runtime, store, adapter };
 }
 
 /** 落下绑定档案并打开对应的真实工作区会话。 */
-async function addMember({ ctx, driver, store, runtime }) {
-  const record = { ...(await store.reserve(member)), phase: "ready" };
+async function addMember(
+  { ctx, driver, store, runtime },
+  input = member,
+  original,
+) {
+  const record = { ...(await store.reserve(input)), phase: "ready" };
   await store.commit(record);
+  const dir = store.dir(record.id);
+  if (original !== undefined) {
+    await writeFile(join(dir, "MEMORY.md"), original);
+    await writeFile(join(dir, "MEMORY.frozen.md"), "旧冻结版本\n");
+  }
   const sessionId = SessionId(record.sessionId);
   const agent = await driver.create(sessionId, model, { cwd: store.root });
   const workspace = await ctx.workspaceRegistry.create(store.root, "军机阁");
   await workspace.attachSession(sessionId);
   await runtime.restore();
-  return { record, agent, sessionId, workspace };
+  return { record, agent, sessionId, workspace, dir };
 }
+
+test(
+  "共享记忆按成员绑定原文件、收尾和保存工具，普通会话保持静默",
+  options,
+  async (t) => {
+    const requests = [];
+    const saveTool = "kongming_memory_save";
+    const reminderKind = "kongming-memory-v1:reminder";
+    const entry = "新条目：计划先核对值班表";
+    const adapter = new (class extends LlmAdapter {
+      resolveModel(provider, id) {
+        return Promise.resolve({ provider, id, name: id });
+      }
+
+      async *stream(options) {
+        requests.push(options);
+        if (requests.length === 2) {
+          const id = ToolCallId("save-member-a");
+          const args = JSON.stringify({ content: entry });
+          yield { type: "block-start", index: 0, blockType: "tool-call" };
+          yield {
+            type: "tool-call-delta",
+            index: 0,
+            id,
+            name: saveTool,
+            argumentsDelta: args,
+          };
+          yield {
+            type: "block-end",
+            index: 0,
+            block: { type: "tool-call", id, name: saveTool, arguments: args },
+          };
+          yield { type: "finish", reason: { kind: "tool-calls" } };
+          return;
+        }
+        const text = "通";
+        yield { type: "block-start", index: 0, blockType: "text" };
+        yield { type: "text-delta", index: 0, text };
+        yield { type: "block-end", index: 0, block: { type: "text", text } };
+        yield { type: "finish", reason: { kind: "stop" } };
+      }
+    })();
+    const host = await fixture(t, adapter, {});
+    const originalA = "甲的旧记忆：巡查松林\n";
+    const originalB = "乙的旧记忆：照看竹屋\n";
+    const a = await addMember(host, member, originalA);
+    const b = await addMember(host, { ...member, name: "庞统测试" }, originalB);
+    const ordinary = await host.driver.create(SessionId("ordinary"), model, {
+      cwd: host.store.root,
+    });
+    assert.ok(host.ctx.tools.get(saveTool, a.agent));
+    assert.ok(host.ctx.tools.get(saveTool, b.agent));
+    assert.equal(host.ctx.tools.get(saveTool, ordinary), undefined);
+
+    for (const agent of [a.agent, b.agent, ordinary]) {
+      agent.followup(prompt("请继续"));
+      await agent.whenIdle();
+    }
+    assert.equal(requests.length, 6);
+    const [requestA, , , requestB, , requestOrdinary] = requests;
+    assert.ok(JSON.stringify(requestA.messages).includes(originalA.trim()));
+    assert.ok(!JSON.stringify(requestA.messages).includes(originalB.trim()));
+    assert.ok(JSON.stringify(requestB.messages).includes(originalB.trim()));
+    assert.ok(!JSON.stringify(requestB.messages).includes(originalA.trim()));
+    assert.ok(
+      !JSON.stringify(requestOrdinary.messages).includes("kongming-memory"),
+    );
+
+    for (const bound of [a, b]) {
+      const reminders = bound.agent.session
+        .snapshotEvents()
+        .filter(
+          (event) =>
+            event.type === "user/message" &&
+            event.data.source.kind === reminderKind,
+        );
+      assert.equal(reminders.length, 1);
+      assert.equal(reminders[0].data.source.sessionId, bound.sessionId);
+      const reminder = reminders[0].data.content[0].text;
+      assert.ok(reminder.includes(saveTool));
+      assert.ok(reminder.includes(join(bound.dir, "MEMORY.md")));
+      assert.ok(reminder.includes(join(bound.dir, "MEMORY.frozen.md")));
+    }
+    const results = a.agent.session
+      .snapshotEvents()
+      .filter((event) => event.type === "tool/result");
+    assert.equal(results.length, 1);
+    assert.equal(results[0].data.message.isError, false);
+    assert.equal(
+      await readFile(join(a.dir, "MEMORY.md"), "utf8"),
+      originalA + entry + "\n",
+    );
+    assert.equal(
+      await readFile(join(a.dir, "MEMORY.frozen.md"), "utf8"),
+      originalA,
+    );
+    assert.equal(await readFile(join(b.dir, "MEMORY.md"), "utf8"), originalB);
+    assert.equal(
+      await readFile(join(b.dir, "MEMORY.frozen.md"), "utf8"),
+      originalB,
+    );
+  },
+);
 
 test(
   "T1：删除先打断生成和清空队列，再归档并保留会话历史",

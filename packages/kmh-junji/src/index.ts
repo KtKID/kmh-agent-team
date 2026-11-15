@@ -4,7 +4,7 @@ import { junjiRoot } from "./paths.ts";
 import { AgentStore } from "./registry.ts";
 import { JunjiRuntime } from "./runtime.ts";
 import { mountWeb } from "./web.ts";
-import { MemoryConfig } from "./memory/config.ts";
+import { Config as MemoryConfig } from "./shared-memory.ts";
 import { mountKongmingTools } from "./kongming-integration.ts";
 
 export const name = "kmh-junji";
@@ -20,7 +20,7 @@ export const inject = [
 ];
 
 export const Config = MemoryConfig;
-export type Config = ReturnType<typeof MemoryConfig>;
+export type Config = ReturnType<typeof Config>;
 
 declare module "@deepseek-ai/cordis" {
   interface Context {

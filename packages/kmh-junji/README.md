@@ -6,7 +6,7 @@
 
 - **大臣管理**：创建/编辑 agent（名字 + 系统提示词 + 模型目录下拉）；agentId 为稳定 slug，重名自动追加 `-2`/`-3`，永不覆盖既有档案，损坏档案目录跳过并上报。
 - **一对一专属会话**：agent↔session 创建时绑定，此后不换（`agent.json` 的 `sessionId` 写后不变）；persona 与模型按档案每次请求注入。
-- **per-agent 记忆**：双文件机制（移植 kongming-memory-v1）——创建时初始化发布冻结；装配时注入冻结正文；收尾 steer 提醒记小本子；手动 `/compact` 成功后原子刷新冻结。
+- **per-agent 记忆**：由 `@kmh/kongming-memory-v1` 绑定各 Agent 的原始与冻结文件。收尾通过 `kongming_memory_save` 追加长期条目，手动 `/compact` 成功后刷新该 Agent 的冻结记忆。
 - **client UI**：侧边栏「军机阁」区块（agent 列表 + 模型微标签 + 启动行）、创建/编辑弹层（宿主 Modal 原语 + 真实主题 token）、点击进入该 agent 的专属会话。
 - **孔明联动（可选）**：当宿主同时运行 `@kmh/kongming` 时，自动向孔明 Agent 挂载 `junji_*` 工具集与提示片段，孔明即可代管军机阁。
 
@@ -16,7 +16,7 @@
 <DSH_HOME>/agent-team/
   <agentId>/               ← agentId：创建时由名字生成的稳定 slug
     agent.json             ← { id, name, systemPrompt, model, sessionId, createdAt, updatedAt }
-    MEMORY.md              ← 原始记忆小本子（agent 自己维护）
+    MEMORY.md              ← 原始记忆小本子（记忆工具追加）
     MEMORY.frozen.md       ← 冻结记忆（插件维护，装配时完整注入）
 ```
 
@@ -25,7 +25,7 @@
 | 字段 | 说明 |
 | --- | --- |
 | `promptTemplate` | 冻结记忆装配模板。必须包含 `{{originalMemoryPath}}`、`{{frozenMemoryPath}}`、`{{frozenMemory}}` 三个变量；缺省提供默认模板。 |
-| `reminderPrompt` | 收尾提醒文案（提示 agent 把有价值内容记入原始记忆文件）；缺省提供默认文案。 |
+| `reminderPrompt` | 收尾提醒文案（提示 agent 通过记忆工具把有价值的内容追加到自己的原始记忆文件）；缺省提供默认文案。 |
 
 ## 安装与本地集成
 
