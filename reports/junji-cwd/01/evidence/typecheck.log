@@ -1,0 +1,10 @@
+
+> kmh-agent-team@ typecheck /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team
+> pnpm -r typecheck
+
+
+> @kmh/kmh-junji@0.1.2 typecheck /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+> node ../../scripts/link-dsh.mjs && tsc -p tsconfig.host.json --noEmit && tsc -p tsconfig.browser.json --noEmit
+
+kongming-os -> /Volumes/machub_app/proj/kongming-os
+dsh peer links ok

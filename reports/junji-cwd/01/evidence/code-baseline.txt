@@ -1,0 +1,15 @@
+16aeb0f2994fbc729d68c091469a8e571fda9ae8
+d915c00d037bfe4f786dfc9835bc5e07c77c46e338ad32aa3a1b6287c4f2de30  packages/kmh-junji/README.md
+be128f42b51dbbefe6b03445a3ce9d034a3806f3d9dedf3149aab3db9eac1352  packages/kmh-junji/src/client/AgentForm.tsx
+4aa60e7b882bb299b6538ed15d182f0a714864fd7d1952ce24913e6b3bd9ce75  packages/kmh-junji/src/client/JunjiPanel.tsx
+b61d0b5890db7a7f2d9344ac338d3343c362eb0fdaa9964640cd66416828db61  packages/kmh-junji/src/client/locales.ts
+7133594b895c0365e5fd4321311eec4767bfa6673acb8f1f73e3438ab46ec7fb  packages/kmh-junji/src/kongming-integration.ts
+da567219260f614e17e92ca35e2e5fff527fb4d7881229194c8cba3b3f313789  packages/kmh-junji/src/paths.ts
+5e33c98b6554996b988a2bcbb73f918a55daa6a44aad70c71f62af4aa5685109  packages/kmh-junji/src/protocol/index.ts
+cd93deb7bdeb5e9d90c64ab860e129085c903f733044f017476cf4d751f0f6cb  packages/kmh-junji/src/registry.ts
+f4e9cb46b73901fd09f8c0d5900e1639e06496fac5b7cc578a8b23359e381f08  packages/kmh-junji/src/runtime.ts
+2b5cb0d5fffdee83774e106dac88b860ed8bbee18f47e911c1297a5ff58fda4d  packages/kmh-junji/test/kongming-integration.test.mjs
+ca1cc0e48e2b4f1c8d4681a0aa9f44e7573c4af4f8c7a23cf00c0f245933811f  packages/kmh-junji/test/remove-agent.test.mjs
+4d543fa08af33bb668d11cdba1a3434933dbb1c44c633fed912aa6c36f13c462  packages/kmh-junji/lib/client.js
+v25.6.1
+10.30.1

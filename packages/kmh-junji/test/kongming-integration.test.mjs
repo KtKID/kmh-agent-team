@@ -135,6 +135,42 @@ test("tool_registered：工具集包含 junji_send", async () => {
   assert.match(definition.description, /Junji/i);
 });
 
+test("junji_create_agent：默认目录直接创建，自定义目录沿用完全权限或单次批准", async (t) => {
+  const runtime = makeRuntime(makeAgent("junji-session"));
+  const create = t.mock.fn(async (input) => input);
+  runtime.create = create;
+  const { ctx, defs, exec } = await mount(runtime);
+  const toolName = "junji_create_agent";
+  const definition = defs.find(({ name }) => name === toolName);
+  assert.equal(definition.parameters.properties.cwd.type, "string");
+  assert.ok(!definition.parameters.required.includes("cwd"));
+  const input = {
+    name: "司马懿",
+    systemPrompt: "巡查项目",
+    model: { provider: "mock", model: "mock" },
+  };
+  const custom = { ...input, cwd: "/projects/example" };
+
+  await execTool(defs, toolName, input, exec);
+  const request = t.mock.fn(async () => "rejected");
+  const policy = { policy: "ask" };
+  ctx.services.set("approval", { config: policy, request, overrideOf: () => undefined });
+  let mode = "workspace-write";
+  ctx.services.set("sandboxPolicy", { resolve: () => ({ mode }) });
+  await assert.rejects(execTool(defs, toolName, custom, exec), /需要用户确认/);
+  assert.equal(create.mock.callCount(), 1);
+  assert.equal(request.mock.calls[0].arguments[0].toolName, toolName);
+  assert.match(request.mock.calls[0].arguments[0].reason, /\/projects\/example/);
+
+  request.mock.mockImplementation(async () => "allowed-once");
+  await execTool(defs, toolName, custom, exec);
+  mode = "danger-full-access";
+  policy.policy = "never";
+  await execTool(defs, toolName, custom, exec);
+  assert.equal(request.mock.callCount(), 2);
+  assert.deepEqual(create.mock.calls.map(({ arguments: args }) => args[0]), [input, custom, custom]);
+});
+
 for (const scenario of [
   {
     label: "完全权限：会话覆盖关闭询问",

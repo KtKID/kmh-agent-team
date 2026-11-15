@@ -99,6 +99,7 @@ export class AgentStore {
       name: input.name,
       systemPrompt: input.systemPrompt,
       model: input.model,
+      ...(input.cwd === undefined ? {} : { cwd: input.cwd }),
       sessionId: randomUUID(),
       phase: "reserved",
       createdAt: now,

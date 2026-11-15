@@ -1,0 +1,79 @@
+[
+  {
+    "file": "src/client/AgentForm.tsx",
+    "state": "无浏览器运行覆盖"
+  },
+  {
+    "file": "src/client/JunjiPanel.tsx",
+    "state": "无浏览器运行覆盖"
+  },
+  {
+    "file": "src/client/locales.ts",
+    "state": "无浏览器运行覆盖"
+  },
+  {
+    "file": "src/kongming-integration.ts",
+    "lines": {
+      "hits": 27,
+      "total": 27,
+      "misses": []
+    },
+    "branches": {
+      "hits": 14,
+      "total": 14,
+      "misses": []
+    }
+  },
+  {
+    "file": "src/paths.ts",
+    "lines": {
+      "hits": 17,
+      "total": 17,
+      "misses": []
+    },
+    "branches": {
+      "hits": 6,
+      "total": 6,
+      "misses": []
+    }
+  },
+  {
+    "file": "src/protocol/index.ts",
+    "lines": {
+      "hits": 8,
+      "total": 8,
+      "misses": []
+    },
+    "branches": {
+      "hits": 0,
+      "total": 0,
+      "misses": []
+    }
+  },
+  {
+    "file": "src/registry.ts",
+    "lines": {
+      "hits": 1,
+      "total": 1,
+      "misses": []
+    },
+    "branches": {
+      "hits": 2,
+      "total": 2,
+      "misses": []
+    }
+  },
+  {
+    "file": "src/runtime.ts",
+    "lines": {
+      "hits": 5,
+      "total": 5,
+      "misses": []
+    },
+    "branches": {
+      "hits": 8,
+      "total": 8,
+      "misses": []
+    }
+  }
+]

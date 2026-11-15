@@ -1,0 +1,63 @@
+✖ 创建接口将自定义目录写入会话头并复用项目工作区 (79.554333ms)
+✖ 无效工作目录在保留档案前拒绝 (82.595458ms)
+✖ 恢复保留档案时沿用自定义目录，旧档案使用军机阁默认目录 (43.936792ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 0
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 627.046042
+
+✖ failing tests:
+
+test at test/remove-agent.test.mjs:120:1
+✖ 创建接口将自定义目录写入会话头并复用项目工作区 (79.554333ms)
+  AssertionError [ERR_ASSERTION]: {"message":"[\n  {\n    \"code\": \"unrecognized_keys\",\n    \"keys\": [\n      \"cwd\"\n    ],\n    \"path\": [],\n    \"message\": \"Unrecognized key: \\\"cwd\\\"\"\n  }\n]"}
+
+  500 !== 200
+
+      at TestContext.<anonymous> (file:///Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji/test/remove-agent.test.mjs:138:10)
+      at async Test.run (node:internal/test_runner/test:1125:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 500,
+    expected: 200,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at test/remove-agent.test.mjs:151:1
+✖ 无效工作目录在保留档案前拒绝 (82.595458ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji/test/remove-agent.test.mjs:159:5)
+      at async Test.run (node:internal/test_runner/test:1125:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /工作目录/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at test/remove-agent.test.mjs:166:1
+✖ 恢复保留档案时沿用自定义目录，旧档案使用军机阁默认目录 (43.936792ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + undefined
+  - '/private/var/folders/53/ck73s8_90tl1y6q2r43hj76m0000gn/T/junji-removal-VvPsgB/project'
+
+      at TestContext.<anonymous> (file:///Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji/test/remove-agent.test.mjs:179:10)
+      at async Test.run (node:internal/test_runner/test:1125:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:787:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: '/private/var/folders/53/ck73s8_90tl1y6q2r43hj76m0000gn/T/junji-removal-VvPsgB/project',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

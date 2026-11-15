@@ -1,4 +1,4 @@
-/** 创建/编辑大臣的表单：名字、系统提示词、模型目录下拉。 */
+/** 创建和编辑大臣的表单，创建时可指定会话工作目录。 */
 import { useState, type ReactNode } from "react";
 import {
   Button,
@@ -8,21 +8,15 @@ import type { PropsLocale } from "@deepseek-ai/dsh-client-ui-slots";
 import type {
   AgentModel,
   AgentRecord,
+  CreateAgentInput,
   ModelCatalog,
 } from "../protocol/index.ts";
-
-/** 表单提交值；reasoningEffort 暂不在此面配置。 */
-export interface FormValues {
-  readonly name: string;
-  readonly systemPrompt: string;
-  readonly model: AgentModel;
-}
 
 interface Props extends PropsLocale<"junji"> {
   readonly catalog: ModelCatalog;
   readonly initial?: AgentRecord;
   readonly submitLabel: string;
-  readonly onSubmit: (values: FormValues) => Promise<void>;
+  readonly onSubmit: (values: CreateAgentInput) => Promise<void>;
   readonly onCancel: () => void;
 }
 
@@ -77,6 +71,7 @@ export function AgentForm({
   );
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
+  const [cwd, setCwd] = useState("");
 
   const known = catalog.groups.some((group) =>
     group.models.some(
@@ -102,6 +97,7 @@ export function AgentForm({
           name: name.trim(),
           systemPrompt,
           model: decodeModel(selection),
+          ...(initial === undefined && cwd.trim() !== "" ? { cwd } : {}),
         })
           .catch((cause: unknown) => {
             setError(cause instanceof Error ? cause.message : String(cause));
@@ -201,6 +197,24 @@ export function AgentForm({
           />
         </div>
       </div>
+      {initial === undefined ? (
+        <div>
+          <label style={labelStyle} htmlFor="junji-agent-cwd">
+            {t("cwd")}
+          </label>
+          <input
+            id="junji-agent-cwd"
+            className="junji-field"
+            style={fieldStyle}
+            value={cwd}
+            placeholder={t("cwdPlaceholder")}
+            spellCheck={false}
+            onChange={(event) => {
+              setCwd(event.target.value);
+            }}
+          />
+        </div>
+      ) : null}
       {error === undefined ? null : (
         <div role="alert" style={{ fontSize: 12, color: "var(--dsw-alias-state-error-primary)" }}>
           {error}

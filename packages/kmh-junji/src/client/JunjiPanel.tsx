@@ -15,8 +15,12 @@ import type {
   PropsRuntime,
 } from "@deepseek-ai/dsh-client-ui-slots";
 import type {} from "@deepseek-ai/dsh-client-ui-renderer/client";
-import type { AgentRecord, ModelCatalog } from "../protocol/index.ts";
-import { AgentForm, type FormValues } from "./AgentForm.tsx";
+import type {
+  AgentRecord,
+  CreateAgentInput,
+  ModelCatalog,
+} from "../protocol/index.ts";
+import { AgentForm } from "./AgentForm.tsx";
 import * as api from "./transport.ts";
 
 /** 注册侧闭包的打开动作。 */
@@ -99,7 +103,7 @@ export function JunjiPanel({ open, t }: PanelProps): ReactNode {
       });
   };
 
-  const onCreate = async (values: FormValues): Promise<void> => {
+  const onCreate = async (values: CreateAgentInput): Promise<void> => {
     const created = await api.createAgent(values);
     setOverlay({ kind: "closed" });
     reload();
@@ -108,7 +112,7 @@ export function JunjiPanel({ open, t }: PanelProps): ReactNode {
 
   const onEdit = async (
     id: string,
-    values: FormValues,
+    values: CreateAgentInput,
   ): Promise<void> => {
     await api.updateAgent(id, {
       ...(values.name === undefined ? {} : { name: values.name }),

@@ -2,6 +2,7 @@
 import { z } from "zod";
 
 const text = z.string().trim().min(1);
+const cwd = z.string().min(1).optional();
 
 /** agent 的模型选择；语义与 DSH ModelSelection 一致。 */
 export const AgentModelSchema = z
@@ -20,6 +21,7 @@ export const AgentRecordSchema = z.object({
   name: text,
   systemPrompt: z.string().min(1),
   model: AgentModelSchema,
+  cwd,
   sessionId: z.string().min(1),
   phase: z.enum(["reserved", "ready"]),
   createdAt: z.string().min(1),
@@ -29,7 +31,14 @@ export type AgentRecord = z.infer<typeof AgentRecordSchema>;
 
 /** 创建 agent 的输入；sessionId 由 host 生成并绑定。 */
 export const CreateAgentInputSchema = z
-  .object({ name: text, systemPrompt: text, model: AgentModelSchema })
+  .object({
+    name: text,
+    systemPrompt: text,
+    model: AgentModelSchema,
+    cwd: cwd.describe(
+      "Existing absolute directory on the host for the new session. Omit to use the Junji default directory.",
+    ),
+  })
   .strict();
 export type CreateAgentInput = z.infer<typeof CreateAgentInputSchema>;
 

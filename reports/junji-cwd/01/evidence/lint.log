@@ -1,0 +1,8 @@
+
+> @kmh/kmh-junji@0.1.2 lint /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+> eslint src --max-warnings 0
+
+sh: eslint: command not found
+/Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @kmh/kmh-junji@0.1.2 lint: `eslint src --max-warnings 0`
+spawn ENOENT

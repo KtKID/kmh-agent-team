@@ -6,6 +6,7 @@
 
 - **大臣管理**：创建/编辑 agent（名字 + 系统提示词 + 模型目录下拉）；agentId 为稳定 slug，重名自动追加 `-2`/`-3`，永不覆盖既有档案，损坏档案目录跳过并上报。
 - **一对一专属会话**：agent↔session 创建时绑定，此后不换（`agent.json` 的 `sessionId` 写后不变）；persona 与模型按档案每次请求注入。
+- **会话工作目录**。创建大臣时可填写服务端已存在的绝对目录，留空使用 `<DSH_HOME>/agent-team`。会话加入对应的工作区，档案与记忆仍保存在 `<DSH_HOME>/agent-team/<agentId>/`。
 - **per-agent 记忆**：由 `@kmh/kongming-memory-v1` 绑定各 Agent 的原始与冻结文件。收尾通过 `kongming_memory_save` 追加长期条目，手动 `/compact` 成功后刷新该 Agent 的冻结记忆。
 - **client UI**：侧边栏「军机阁」区块（agent 列表 + 模型微标签 + 启动行）、创建/编辑弹层（宿主 Modal 原语 + 真实主题 token）、点击进入该 agent 的专属会话。
 - **孔明联动（可选）**：当宿主同时运行 `@kmh/kongming` 时，自动向孔明 Agent 挂载 `junji_*` 工具集与提示片段，孔明即可代管军机阁。
@@ -15,7 +16,7 @@
 ```
 <DSH_HOME>/agent-team/
   <agentId>/               ← agentId：创建时由名字生成的稳定 slug
-    agent.json             ← { id, name, systemPrompt, model, sessionId, createdAt, updatedAt }
+    agent.json             ← { id, name, systemPrompt, model, cwd?, sessionId, createdAt, updatedAt }
     MEMORY.md              ← 原始记忆小本子（记忆工具追加）
     MEMORY.frozen.md       ← 冻结记忆（插件维护，装配时完整注入）
 ```
@@ -44,7 +45,8 @@
 `@kmh/kongming` 在场时挂载（均以 `junji_` 前缀）：
 
 - `junji_list_agents` / `junji_list_models` — 列出大臣与可用模型目录
-- `junji_create_agent` / `junji_update_agent` — 创建 / 改名、改提示词、改模型
+- `junji_create_agent` — 创建大臣。可传 `cwd` 指定服务端绝对目录，由宿主按完全权限或单次确认执行。
+- `junji_update_agent` — 改名、改提示词、改模型
 - `junji_open_agent` — 准备某大臣的专属会话并返回 sessionId
 - `junji_send` — 给指定大臣的专属会话发消息，回复自动回到孔明会话
 - `junji_remove_agent` — 孔明会话设为完全权限时直接执行，其他模式按宿主规则取得单次批准后执行。停止成员的会话任务，归档会话，再删除档案与记忆。归档保留聊天历史。

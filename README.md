@@ -16,13 +16,15 @@
 https://github.com/KtKID/kmh-agent-team/releases/latest/download/kmh-junji.tgz
 ```
 
-当前安装包适配 DeepSeek Harness `0.2.2-rc.2`，已在该版本的 Web 界面验证。指定版本的安装包和变更记录见 [GitHub Releases](https://github.com/KtKID/kmh-agent-team/releases)。
+安装包面向 DeepSeek Harness `0.2.2-rc.2`。指定版本的安装包见 [GitHub Releases](https://github.com/KtKID/kmh-agent-team/releases)，版本变更见 [CHANGELOG](CHANGELOG.md)。
 
 ## 创建第一位大臣
 
 1. 在 Harness 登录 DeepSeek 账号或配置一个可用的模型。 [官方模型配置指南](https://deepseek-harness.github.io/deepseek-harness/guide/providers)
 2. 打开侧栏「军机阁」，点击右上角「+」。名字填「文档助手」，系统提示词填「你负责把会议笔记整理成待办清单」，然后选一个可用模型。
 3. 点击「创建」。进入文档助手的专属会话后，发送「把这两条会议笔记整理成待办：周三发初稿，周五收反馈」，应收到待办清单。下次从军机阁点开这位大臣，会回到同一会话。
+
+大臣需要在指定项目中工作时，可在创建时填写宿主上已存在的绝对目录。留空使用军机阁默认工作目录。
 
 ## 功能
 

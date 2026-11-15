@@ -1,9 +1,17 @@
 /** 军机阁成员生命周期及记忆隔离回归，经真实宿主会话和持久化执行。 */
 import assert from "node:assert/strict";
 import { once } from "node:events";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import {
+  mkdir,
+  mkdtemp,
+  readFile,
+  realpath,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import test from "node:test";
 import { Context } from "@deepseek-ai/cordis";
 import {
@@ -29,6 +37,7 @@ import { mountKongmingTools } from "../lib/src/kongming-integration.js";
 import { JunjiRuntime } from "../lib/src/runtime.js";
 import { AgentStore } from "../lib/src/registry.js";
 import { Config as MemoryConfig } from "../lib/src/index.js";
+import { mountWeb } from "../lib/src/web.js";
 
 const model = { provider: "mock", model: "mock" };
 const member = { name: "司马测试", systemPrompt: "测试专属会话", model };
@@ -42,6 +51,10 @@ class BlockingAdapter extends LlmAdapter {
 
   resolveModel(provider, id) {
     return Promise.resolve({ provider, id, name: id });
+  }
+
+  listModels(provider) {
+    return Promise.resolve([{ provider, id: model.model, name: model.model }]);
   }
 
   async *stream({ signal }) {
@@ -95,6 +108,115 @@ async function fixture(
   );
   return { ctx, driver, runtime, store, adapter };
 }
+
+/** 用真实执行循环处理会话创建，替代测试宿主未装配的 RPC 控制器。 */
+function mountCreateController({ ctx, driver }) {
+  const controller = {
+    async create({ sessionId, cwd }) {
+      await driver.create(sessionId, model, { cwd });
+      return { sessionId };
+    },
+    async resolveAgent(sessionId) {
+      return { agent: ctx.agents.get(sessionId) };
+    },
+    async rename() {},
+  };
+  ctx.provide("sessionController", controller);
+  return controller;
+}
+
+test("创建接口将自定义目录写入会话头并复用项目工作区", options, async (t) => {
+  const host = await fixture(t);
+  const { ctx, runtime, store } = host;
+  mountCreateController(host);
+  const parent = dirname(store.root);
+  const project = await mkdir(join(parent, "项目目录"), { recursive: true });
+  const path = await realpath(project);
+  const alias = join(parent, "项目入口");
+  await symlink(path, alias, "dir");
+  const workspace = await ctx.workspaceRegistry.create(path, "我的项目");
+
+  const routes = new Map();
+  mountWeb(
+    { connection: { fetch: { register: (route) => routes.set(route.path, route.fetch) } } },
+    runtime,
+  );
+  const url = new URL("http://localhost/api/kmh-junji/create");
+  const response = await routes.get(url.pathname)(
+    new Request(url, { method: "POST", body: JSON.stringify({ ...member, cwd: alias }) }),
+  );
+  assert.equal(response.status, 200, await response.clone().text());
+  const { agent, sessionId } = await response.json();
+  assert.equal(agent.cwd, path);
+  assert.equal((await store.read(agent.id)).cwd, path);
+  assert.equal(ctx.sessions.get(sessionId).header.cwd, path);
+  const persisted = await ctx.sessionPersistence.list();
+  const stored = persisted.find(({ header }) => header.id === sessionId);
+  assert.equal(stored.header.cwd, path);
+  assert.deepEqual(workspace.sessionIds, [sessionId]);
+  assert.equal(workspace.title, "我的项目");
+  assert.equal(
+    await readFile(join(store.dir(agent.id), "MEMORY.md"), "utf8"),
+    "",
+  );
+  assert.deepEqual(await runtime.open(agent.id), { sessionId });
+});
+
+test("无效工作目录在保留档案前拒绝", options, async (t) => {
+  const host = await fixture(t);
+  const { runtime, store } = host;
+  const controller = mountCreateController(host);
+  const create = t.mock.method(controller, "create");
+  const file = join(dirname(store.root), "file.txt");
+  await writeFile(file, "测试文件");
+  for (const cwd of ["relative/path", join(dirname(store.root), "missing"), file]) {
+    await assert.rejects(runtime.create({ ...member, cwd }), /工作目录/);
+  }
+  assert.deepEqual(runtime.list(), []);
+  assert.deepEqual((await store.list()).records, []);
+  assert.equal(create.mock.callCount(), 0);
+});
+
+test("恢复保留档案时沿用自定义目录，旧档案使用军机阁默认目录", options, async (t) => {
+  const host = await fixture(t);
+  const { ctx, runtime, store } = host;
+  const controller = mountCreateController(host);
+  const project = await mkdir(join(dirname(store.root), "project"), {
+    recursive: true,
+  });
+  const path = await realpath(project);
+  const create = t.mock.method(controller, "create", async () => {
+    throw Error("测试会话创建中断");
+  });
+  await assert.rejects(
+    runtime.create({ ...member, cwd: path }),
+    /测试会话创建中断/,
+  );
+  create.mock.restore();
+  const [reserved] = (await store.list()).records;
+  assert.equal(reserved.phase, "reserved");
+  assert.equal(reserved.cwd, path);
+  const legacy = await store.reserve({ ...member, name: "旧档案" });
+  assert.equal(legacy.cwd, undefined);
+  await runtime.restore();
+
+  for (const [record, cwd, title] of [
+    [reserved, path, "project"],
+    [legacy, await realpath(store.root), "军机阁"],
+  ]) {
+    const { sessionId } = await runtime.open(record.id);
+    assert.equal(sessionId, record.sessionId);
+    assert.equal(ctx.sessions.get(sessionId).header.cwd, cwd);
+    assert.equal((await store.read(record.id)).phase, "ready");
+    const workspace = await ctx.workspaceRegistry.resolveByPath(cwd);
+    assert.equal(workspace.title, title);
+    assert.deepEqual(workspace.sessionIds, [sessionId]);
+  }
+
+  const { agent, sessionId } = await runtime.create({ ...member, name: "默认目录" });
+  assert.equal(agent.cwd, undefined);
+  assert.equal(ctx.sessions.get(sessionId).header.cwd, await realpath(store.root));
+});
 
 /** 落下绑定档案并打开对应的真实工作区会话。 */
 async function addMember(

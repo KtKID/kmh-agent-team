@@ -1,13 +1,12 @@
 /** 军机阁运行时：agent↔session 一对一永久绑定的创建、恢复、更新与提示词装载。 */
-import { mkdir, realpath } from "node:fs/promises";
 import type { Context } from "@deepseek-ai/cordis";
 import type { Agent, ModelSelection } from "@deepseek-ai/dsh-agent";
 import { ReasoningEffortId } from "@deepseek-ai/dsh-llm";
 import { SessionId } from "@deepseek-ai/dsh-session";
 import { WorkspaceUnknownSessionError } from "@deepseek-ai/dsh-workspace";
-import type { Workspace } from "@deepseek-ai/dsh-workspace/types";
 import type {} from "@deepseek-ai/dsh-api-session-controller";
 import type { Config as MemoryConfig } from "./index.ts";
+import { resolveAgentCwd } from "./paths.ts";
 import { AgentStore } from "./registry.ts";
 import { mountAgentPrompt } from "./prompt.ts";
 import {
@@ -36,8 +35,6 @@ export class JunjiRuntime {
     string,
     { agent: Agent; ready: Promise<void>; release: () => Promise<void> }
   >();
-  private canonicalRoot: string | undefined;
-  private workspace: Workspace | undefined;
   private closed = false;
   private closing: Promise<void> | undefined;
   private operations = Promise.resolve();
@@ -95,8 +92,10 @@ export class JunjiRuntime {
    */
   async create(input: CreateAgentInput): Promise<AgentCreated> {
     return this.run(async () => {
+      const cwd =
+        input.cwd === undefined ? undefined : await resolveAgentCwd(input.cwd);
       const selection = await this.resolveModel(input.model);
-      const record = await this.store.reserve(input);
+      const record = await this.store.reserve({ ...input, cwd });
       this.records.set(record.id, record);
       const ready = await this.ensureAgent(record, selection);
       return { agent: ready, sessionId: ready.sessionId };
@@ -205,30 +204,6 @@ export class JunjiRuntime {
     this.records.delete(id);
   }
 
-  /** 建（或复用）军机阁 workspace 并返回规范路径；目录先建后规范。 */
-  private async ensureRoot(): Promise<string> {
-    if (this.canonicalRoot !== undefined) return this.canonicalRoot;
-    await mkdir(this.root, { recursive: true, mode: 0o700 });
-    this.canonicalRoot = await realpath(this.root);
-    return this.canonicalRoot;
-  }
-
-  /** 军机阁 workspace：按规范路径复用已有，否则以“军机阁”标题创建。 */
-  private async ensureWorkspace(): Promise<Workspace> {
-    if (this.workspace !== undefined) return this.workspace;
-    const canonical = await this.ensureRoot();
-    const existing = this.ctx.workspaceRegistry
-      .list()
-      .find((workspace) => workspace.path === canonical);
-    this.workspace =
-      existing ??
-      (await this.ctx.workspaceRegistry.create(
-        canonical,
-        JUNJI_WORKSPACE_TITLE,
-      ));
-    return this.workspace;
-  }
-
   /** 完成或确认 agent 的专属会话；reserved 档案从这里续建。 */
   private async ensureAgent(
     record: AgentRecord,
@@ -239,10 +214,13 @@ export class JunjiRuntime {
       return record;
     }
     const selection = validated ?? (await this.resolveModel(record.model));
-    const workspace = await this.ensureWorkspace();
+    const workspace = await this.ctx.workspaceRegistry.create(
+      record.cwd ?? this.root,
+      record.cwd === undefined ? JUNJI_WORKSPACE_TITLE : undefined,
+    );
     const created = await this.ctx.sessionController.create({
       sessionId: SessionId(record.sessionId),
-      cwd: await this.ensureRoot(),
+      cwd: record.cwd ?? workspace.path,
     });
     if (created.sessionId !== SessionId(record.sessionId))
       throw Error("军机阁会话创建返回了不同的会话，已拒绝绑定");

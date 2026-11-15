@@ -60,6 +60,33 @@ function tool<Schema extends z.ZodType>(
   };
 }
 
+/** 检查来源会话的权限，必要时按工具名和理由请求单次批准；取消时中止。 */
+async function allowAgentManagement(
+  ctx: Context,
+  source: Agent,
+  { callId, signal }: ToolRunContext,
+  toolName: string,
+  reason: string,
+): Promise<boolean> {
+  const approval = ctx.get("approval");
+  const session = source.session;
+  const policy = approval?.overrideOf(session) ?? approval?.config.policy;
+  const fullAccess =
+    policy === "never" &&
+    ctx.get("sandboxPolicy")?.resolve({ session }).mode === "danger-full-access";
+  const allowed =
+    fullAccess ||
+    (await approval?.request({
+      agent: source,
+      toolName,
+      callId,
+      reason,
+      signal,
+    })) === "allowed-once";
+  signal.throwIfAborted();
+  return allowed;
+}
+
 function definitions(
   ctx: Context,
   runtime: JunjiRuntime,
@@ -85,7 +112,19 @@ function definitions(
       "junji_create_agent",
       "Create a persistent Junji Agent with its own session. Use exact provider and model IDs from junji_list_models.",
       CreateAgentInputSchema,
-      (input) => runtime.create(input),
+      async (input, exec) => {
+        if (input.cwd !== undefined) {
+          const allowed = await allowAgentManagement(
+            ctx,
+            source,
+            exec,
+            "junji_create_agent",
+            `为新大臣「${input.name}」使用工作目录 ${input.cwd}`,
+          );
+          if (!allowed) throw Error("指定大臣工作目录需要用户确认");
+        }
+        return runtime.create(input);
+      },
     ),
     tool(
       "junji_update_agent",
@@ -103,27 +142,17 @@ function definitions(
       "junji_remove_agent",
       "Stop and archive a Junji Agent's session, then delete its profile and memory. Requires full access or one-time user approval. The archived session retains its history.",
       AgentInput,
-      async ({ agentId }, { callId, signal }) => {
+      async ({ agentId }, exec) => {
         const record = runtime.list().find(({ id }) => id === agentId);
         if (record === undefined)
           throw Error(`军机阁没有名为 ${agentId} 的大臣`);
-        const approval = ctx.get("approval");
-        const session = source.session;
-        const policy = approval?.overrideOf(session) ?? approval?.config.policy;
-        const fullAccess =
-          policy === "never" &&
-          ctx.get("sandboxPolicy")?.resolve({ session }).mode ===
-            "danger-full-access";
-        const allowed =
-          fullAccess ||
-          (await approval?.request({
-            agent: source,
-            toolName: "junji_remove_agent",
-            callId,
-            reason: `停止并归档军机阁大臣「${record.name}」（${agentId}）的会话，删除其档案和记忆，保留会话历史。`,
-            signal,
-          })) === "allowed-once";
-        signal.throwIfAborted();
+        const allowed = await allowAgentManagement(
+          ctx,
+          source,
+          exec,
+          "junji_remove_agent",
+          `停止并归档军机阁大臣「${record.name}」（${agentId}）的会话，删除其档案和记忆，保留会话历史。`,
+        );
         if (!allowed) throw Error("删除大臣需要用户确认");
         await runtime.remove(agentId, record);
         return { removed: true, agentId };

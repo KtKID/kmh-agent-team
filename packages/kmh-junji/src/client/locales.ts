@@ -13,6 +13,8 @@ export const zh = {
   systemPrompt: "系统提示词",
   systemPromptPlaceholder: "描述这位大臣的身份、职责与行事风格……",
   model: "模型",
+  cwd: "工作目录（可选）",
+  cwdPlaceholder: "服务端绝对路径，留空使用默认目录",
   submitCreate: "创建",
   submitSave: "保存",
   cancel: "取消",
@@ -40,6 +42,8 @@ export const en: Record<JunjiKey, string> = {
   systemPromptPlaceholder:
     "Describe this minister's identity, duties, and style…",
   model: "Model",
+  cwd: "Working directory (optional)",
+  cwdPlaceholder: "Absolute path on the host. Leave blank to use the default.",
   submitCreate: "Create",
   submitSave: "Save",
   cancel: "Cancel",

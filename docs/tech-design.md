@@ -14,7 +14,7 @@
 5. 每个 agent 独立目录，位于 `<home>/agent-team/<agentId>/`（home 为服务端 DSH home）。
 6. 每个 agent 的会话支持独立压缩（DSH compaction 本身 per-session，天然独立；记忆冻结随压缩刷新）。
 7. Web 侧边栏新增"军机阁"区块：已创建 agent 的列表 + ➕ 创建入口。
-8. 创建面板（弹出）：agent 名字 + 系统提示词 + 模型选择。
+8. 创建面板（弹出）：agent 名字、系统提示词、模型选择和可选的工作目录。
 
 ### 明确不做（一期）
 
@@ -49,7 +49,7 @@ kmh-agent-team/                                ← 独立仓库（本仓库）
 ```
 $DSH_HOME/agent-team/
   <agentId>/                 ← agentId：稳定 slug（创建时由名字生成，重名加 -2/-3）
-    agent.json               ← { id, name, systemPrompt, model, sessionId, createdAt, updatedAt }
+    agent.json               ← { id, name, systemPrompt, model, cwd?, sessionId, createdAt, updatedAt }
     MEMORY.md                ← 原始记忆小本子（记忆保存工具追加）
     MEMORY.frozen.md         ← 冻结记忆（插件维护，装配时完整读取）
   registry.json              ← 索引（可选，agent 目录扫描亦可；一期直接扫目录 + agent.json）
@@ -63,10 +63,12 @@ $DSH_HOME/agent-team/
 ### 4.1 Agent 注册表（registry）
 
 - 服务：`junji.agents` — `list() / create(input) / remove(id) / update(id, patch)`。
-- `create(input: { name, systemPrompt, model })`：
+- `create(input: { name, systemPrompt, model, cwd? })`：
   1. 生成 slug agentId，建目录，写 agent.json；
   2. 初始化 MEMORY.md（空文件 0600）与 MEMORY.frozen.md（首次发布：原始为空时保留已有冻结/发布空冻结——沿用 kongming-memory-v1 initializeMemoryFiles 语义）；
   3. 创建专属 DSH session（persona=systemPrompt、model=model），回写 sessionId。
+- `cwd` 接受服务端已存在的绝对目录。创建时解析路径并写入保留档案，供创建中断后续建。会话归入该目录对应的工作区。省略时使用 `<DSH_HOME>/agent-team` 工作区。档案和记忆仍保存在 `<DSH_HOME>/agent-team/<agentId>/`，已绑定的会话继续使用其原工作目录。
+- 孔明调用 `junji_create_agent` 指定 `cwd` 时，沿用宿主的完全权限或单次确认。Web 表单和已鉴权的创建接口直接使用用户给出的目录。
 - `remove(id)`：按成员绑定的会话 ID 打断运行中的任务，清理活动会话的待处理输入，等待该轮结束后调用宿主归档，再移除成员档案和记忆。会话历史随归档保留；取消归档只恢复会话。宿主归档失败时保留成员档案供重试。
 - 孔明通过 `junji_remove_agent` 删除大臣时，按孔明会话当前的授权执行。完全权限下直接删除，其他模式按宿主规则请求单次批准。审批拒绝、取消或不可用时停止操作。
 - `update(id, { name?, systemPrompt?, model? })`：写 agent.json；systemPrompt/model 变更只影响后续请求（persona 装配是每次请求时进行）。
@@ -104,7 +106,7 @@ $DSH_HOME/agent-team/
 
 - **军机阁图标**。插件管理页与仓库 README 使用同一张透明彩色图。侧栏从原图提取双层飞檐轮廓，沿用 DSH 提供的尺寸与前景色。
 - **侧边栏"军机阁"区块**：通过 client 插件注入（`dsh.client.inject` 同 kmh-team 模式）。区块 = 标题行（"军机阁" + ➕）+ agent 列表（名字 + 模型微标签 + 最近活动时间）；点击 agent → 打开其专属 session；右键/hover 菜单：编辑（改系统提示词/模型/名字）、删除（确认后停止任务、归档会话并移除记忆目录）。
-- **创建面板**（点 ➕ 弹出）：名字（必填）、系统提示词（多行 textarea，必填，带占位示例）、模型（下拉，来自模型目录）；提交 → host create → 列表刷新 → 直接打开新 agent 会话。
+- **创建面板**（点 ➕ 弹出）：名字（必填）、系统提示词（多行 textarea，必填，带占位示例）、模型（下拉，来自模型目录）、工作目录（可选，留空使用军机阁的默认目录）。提交 → host create → 列表刷新 → 直接打开新 agent 会话。
 - **编辑面板**：同创建面板复用，预填现值。
 - **模型下拉**：箭头距右边框约 12 像素，长模型名有独立的文字空间，鼠标和键盘均可选择。
 - i18n：文案走 locale 字典（kmh 一期为中文为主，结构上留 en）。
@@ -144,6 +146,7 @@ $DSH_HOME/agent-team/
 
 ## 变更记录
 
+- 2026-11-15 · 修改 §4.1、§5 创建大臣 · 支持指定会话工作目录 · [任务记录](task/task-junji-cwd.md) · 已实现，待沙盒验收
 - 2026-11-14 · 修改 §4.3 军机阁记忆 · 复用孔明记忆插件并沿用每个 Agent 的原文件 · [任务记录](task/task-use-kongming-memory.md)
 
 - 2026-11-14 · 修改 §4.1 孔明删除大臣 · 支持完全权限下直接删除 · [任务记录](task/task-remove-agent-full-access.md)
