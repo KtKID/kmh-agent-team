@@ -1,4 +1,4 @@
-[E1] 2026-11-14T03:26:55.902Z | 修改前测试红灯 | cwd=/Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji | 源码=f42f0ba，测试为本轮新增
+[E1] 2026-11-14T03:26:55.902Z | 修改前测试红灯 | cwd=<repo>/packages/kmh-junji | 源码=f42f0ba，测试为本轮新增
 node --test test/kongming-integration.test.mjs
 exit=1
 ✔ tool_registered：工具集包含 junji_send (1.92425ms)
@@ -33,30 +33,30 @@ exit=1
 test at test/kongming-integration.test.mjs:204:3
 ✖ junji_remove_agent：完全权限：会话覆盖关闭询问 (1.048625ms)
   Error: 删除大臣需要用户确认
-      at file:///Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji/lib/src/kongming-integration.js:53:23
-      at async Object.execute (file:///Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji/lib/src/kongming-integration.js:29:35)
+      at file://<repo>/packages/kmh-junji/lib/src/kongming-integration.js:53:23
+      at async Object.execute (file://<repo>/packages/kmh-junji/lib/src/kongming-integration.js:29:35)
 
 test at test/kongming-integration.test.mjs:204:3
 ✖ junji_remove_agent：完全权限：宿主默认关闭询问 (0.26825ms)
   Error: 删除大臣需要用户确认
-      at file:///Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji/lib/src/kongming-integration.js:53:23
-      at async Object.execute (file:///Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji/lib/src/kongming-integration.js:29:35)
+      at file://<repo>/packages/kmh-junji/lib/src/kongming-integration.js:53:23
+      at async Object.execute (file://<repo>/packages/kmh-junji/lib/src/kongming-integration.js:29:35)
 
-[E2] 2026-11-14T03:29:32.285Z | 插件构建与全量测试 | cwd=/Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+[E2] 2026-11-14T03:29:32.285Z | 插件构建与全量测试 | cwd=<repo>/packages/kmh-junji
 NODE_OPTIONS='--experimental-test-coverage --test-coverage-include=lib/src/kongming-integration.js --enable-source-maps' pnpm test --experimental-test-coverage --test-coverage-include=lib/src/kongming-integration.js --enable-source-maps
 exit=9
 node: --experimental-test-coverage is not allowed in NODE_OPTIONS
 
-[E3] 2026-11-14T03:29:44.889Z | 构建当前插件 | cwd=/Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+[E3] 2026-11-14T03:29:44.889Z | 构建当前插件 | cwd=<repo>/packages/kmh-junji
 pnpm build
 exit=0
 
-> @kmh/kmh-junji@0.1.1 build /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+> @kmh/kmh-junji@0.1.1 build <repo>/packages/kmh-junji
 > node build.mjs
 
 
-[E4] 2026-11-14T03:29:46.076Z | 全量测试和覆盖率（NODE_V8_COVERAGE=evidence/coverage） | cwd=/Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
-/opt/homebrew/Cellar/node/25.6.1_1/bin/node --experimental-test-coverage --test-coverage-include=lib/src/kongming-integration.js --test --test-concurrency=1 test/kongming-integration.test.mjs test/memory.test.mjs test/registry.test.mjs test/remove-agent.test.mjs
+[E4] 2026-11-14T03:29:46.076Z | 全量测试和覆盖率（NODE_V8_COVERAGE=evidence/coverage） | cwd=<repo>/packages/kmh-junji
+node --experimental-test-coverage --test-coverage-include=lib/src/kongming-integration.js --test --test-concurrency=1 test/kongming-integration.test.mjs test/memory.test.mjs test/registry.test.mjs test/remove-agent.test.mjs
 exit=0
 ✔ tool_registered：工具集包含 junji_send (1.933ms)
 ✔ junji_remove_agent：完全权限：会话覆盖关闭询问 (2.294291ms)
@@ -109,8 +109,8 @@ exit=0
 ℹ --------------------------------------------------------------------------
 ℹ end of coverage report
 
-[E5] 2026-11-14T03:32:08.537Z | 最终全量测试与覆盖率 | cwd=/Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
-node --experimental-test-coverage --test-coverage-include=lib/src/kongming-integration.js --test --test-concurrency=1 --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=/Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/reports/remove-agent-full-access/01/evidence/coverage/lcov.info test/kongming-integration.test.mjs test/memory.test.mjs test/registry.test.mjs test/remove-agent.test.mjs
+[E5] 2026-11-14T03:32:08.537Z | 最终全量测试与覆盖率 | cwd=<repo>/packages/kmh-junji
+node --experimental-test-coverage --test-coverage-include=lib/src/kongming-integration.js --test --test-concurrency=1 --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=<repo>/reports/remove-agent-full-access/01/evidence/coverage/lcov.info test/kongming-integration.test.mjs test/memory.test.mjs test/registry.test.mjs test/remove-agent.test.mjs
 exit=0
 ✔ tool_registered：工具集包含 junji_send (2.468708ms)
 ✔ junji_remove_agent：完全权限：会话覆盖关闭询问 (2.094333ms)
@@ -164,23 +164,23 @@ exit=0
 ℹ --------------------------------------------------------------------------
 ℹ end of coverage report
 
-[E6] 2026-11-14T03:33:02.401Z | cwd=/Volumes/machub_app/proj/kmh-plugin/kmh-agent-team
+[E6] 2026-11-14T03:33:02.401Z | cwd=<repo>
 pnpm typecheck
 exit=0
 
-> kmh-agent-team@ typecheck /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team
+> kmh-agent-team@ typecheck <repo>
 > pnpm -r typecheck
 
 
-> @kmh/kmh-junji@0.1.1 typecheck /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+> @kmh/kmh-junji@0.1.1 typecheck <repo>/packages/kmh-junji
 > tsc -p tsconfig.host.json --noEmit && tsc -p tsconfig.browser.json --noEmit
 
-[E7] 2026-11-14T03:33:02.417Z | cwd=/Volumes/machub_app/proj/kmh-plugin/kmh-agent-team
+[E7] 2026-11-14T03:33:02.417Z | cwd=<repo>
 git diff --check
 exit=0
 标准输出和错误输出为空
 
-[E8] 2026-11-14T03:33:02.757Z | cwd=/Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+[E8] 2026-11-14T03:33:02.757Z | cwd=<repo>/packages/kmh-junji
 node --test --test-name-pattern=完全权限 test/remove-agent.test.mjs
 exit=0
 ✔ 孔明切换为完全权限后直接删除并归档 (107.898292ms)
@@ -193,15 +193,15 @@ exit=0
 ℹ todo 0
 ℹ duration_ms 285.988
 
-[E9] 2026-11-14T03:33:02.916Z | cwd=/Volumes/machub_app/proj/kmh-plugin/kmh-agent-team
-/Volumes/machub_app/proj/kongming-os/node_modules/.bin/prettier --check packages/kmh-junji/src/kongming-integration.ts packages/kmh-junji/package.json packages/kmh-junji/test/remove-agent.test.mjs
+[E9] 2026-11-14T03:33:02.916Z | cwd=<repo>
+<proj>/kongming-os/node_modules/.bin/prettier --check packages/kmh-junji/src/kongming-integration.ts packages/kmh-junji/package.json packages/kmh-junji/test/remove-agent.test.mjs
 exit=0
 Checking formatting...
 All matched files use Prettier code style!
 
-[E10] 2026-11-14T03:33:29.529Z | cwd=/Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji | 宿主 ESLint recommendedTypeChecked 对比 HEAD 与工作区，使用 tsconfig.host.json
+[E10] 2026-11-14T03:33:29.529Z | cwd=<repo>/packages/kmh-junji | 宿主 ESLint recommendedTypeChecked 对比 HEAD 与工作区，使用 tsconfig.host.json
 基线
-/Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji/src/kongming-integration.ts
+<repo>/packages/kmh-junji/src/kongming-integration.ts
    54:64  error  'value' may use Object's default stringification format ('[object Object]') when stringified                                                                                                                                                                                                                                                @typescript-eslint/no-base-to-string
   130:29  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
 Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value.
@@ -209,7 +209,7 @@ If a function does not access `this`, it can be annotated with `this: void`  @ty
 
 ✖ 2 problems (2 errors, 0 warnings)
 本轮
-/Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji/src/kongming-integration.ts
+<repo>/packages/kmh-junji/src/kongming-integration.ts
    55:64  error  'value' may use Object's default stringification format ('[object Object]') when stringified                                                                                                                                                                                                                                                @typescript-eslint/no-base-to-string
   140:29  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
 Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value.
@@ -218,11 +218,11 @@ If a function does not access `this`, it can be annotated with `this: void`  @ty
 ✖ 2 problems (2 errors, 0 warnings)
 诊断一致=true
 
-[E11] 2026-11-14T03:33:29.978Z | cwd=/Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji | 使用已安装的 Prettier
+[E11] 2026-11-14T03:33:29.978Z | cwd=<repo>/packages/kmh-junji | 使用已安装的 Prettier
 pnpm format:check
 exit=1
 
-> @kmh/kmh-junji@0.1.1 format:check /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+> @kmh/kmh-junji@0.1.1 format:check <repo>/packages/kmh-junji
 > prettier src tsconfig*.json package.json --check
 
 Checking formatting...

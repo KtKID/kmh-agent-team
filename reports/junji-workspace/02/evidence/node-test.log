@@ -1,15 +1,15 @@
 
-> @ktkid/kmh-junji@0.1.7 pretest /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+> @ktkid/kmh-junji@0.1.7 pretest <repo>/packages/kmh-junji
 > pnpm build
 
 
-> @ktkid/kmh-junji@0.1.7 build /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+> @ktkid/kmh-junji@0.1.7 build <repo>/packages/kmh-junji
 > node ../../scripts/link-dsh.mjs && node build.mjs
 
-kongming-os -> /Volumes/machub_app/proj/kongming-os
+kongming-os -> <proj>/kongming-os
 dsh peer links ok
 
-> @ktkid/kmh-junji@0.1.7 test /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+> @ktkid/kmh-junji@0.1.7 test <repo>/packages/kmh-junji
 > node --test --test-concurrency=1 test/*.test.mjs
 
 ✔ tool_registered：工具集包含 junji_send (1.767ms)

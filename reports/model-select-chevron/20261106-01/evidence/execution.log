@@ -1,31 +1,31 @@
 E1 2026-11-06 12:09:48 +0800
-工作目录 /Volumes/machub_app/proj/x-agent-team
+工作目录 <proj>/x-agent-team
 比较基线 e8f0bd0
 9a0faf3ba8a23b706fff6c3761dedfe246183083beed416c8f3f9e2b6c849434  packages/kmh-junji/src/client/AgentForm.tsx
 
 执行 pnpm typecheck && pnpm test
 
-> x-agent-team@ typecheck /Volumes/machub_app/proj/x-agent-team
+> x-agent-team@ typecheck <proj>/x-agent-team
 > pnpm -r typecheck
 
 
-> @kmh/kmh-junji@0.1.0 typecheck /Volumes/machub_app/proj/x-agent-team/packages/kmh-junji
+> @kmh/kmh-junji@0.1.0 typecheck <proj>/x-agent-team/packages/kmh-junji
 > tsc -p tsconfig.host.json --noEmit && tsc -p tsconfig.browser.json --noEmit
 
 
-> x-agent-team@ test /Volumes/machub_app/proj/x-agent-team
+> x-agent-team@ test <proj>/x-agent-team
 > pnpm -r test
 
 
-> @kmh/kmh-junji@0.1.0 pretest /Volumes/machub_app/proj/x-agent-team/packages/kmh-junji
+> @kmh/kmh-junji@0.1.0 pretest <proj>/x-agent-team/packages/kmh-junji
 > pnpm build
 
 
-> @kmh/kmh-junji@0.1.0 build /Volumes/machub_app/proj/x-agent-team/packages/kmh-junji
+> @kmh/kmh-junji@0.1.0 build <proj>/x-agent-team/packages/kmh-junji
 > node build.mjs
 
 
-> @kmh/kmh-junji@0.1.0 test /Volumes/machub_app/proj/x-agent-team/packages/kmh-junji
+> @kmh/kmh-junji@0.1.0 test <proj>/x-agent-team/packages/kmh-junji
 > node --test --test-concurrency=1 test/*.test.mjs
 
 ✔ resolveMemoryFiles 落在 agent 独立目录 (0.643333ms)
@@ -69,27 +69,27 @@ Checking formatting...
 E4 技术复跑（仅对新增 JSX 换行）
 9d17388094ff70aab70da03f103c1ebcc0387d4d3f0d63cb0afe635e2e8f5c63  packages/kmh-junji/src/client/AgentForm.tsx
 
-> x-agent-team@ typecheck /Volumes/machub_app/proj/x-agent-team
+> x-agent-team@ typecheck <proj>/x-agent-team
 > pnpm -r typecheck
 
 
-> @kmh/kmh-junji@0.1.0 typecheck /Volumes/machub_app/proj/x-agent-team/packages/kmh-junji
+> @kmh/kmh-junji@0.1.0 typecheck <proj>/x-agent-team/packages/kmh-junji
 > tsc -p tsconfig.host.json --noEmit && tsc -p tsconfig.browser.json --noEmit
 
 
-> x-agent-team@ test /Volumes/machub_app/proj/x-agent-team
+> x-agent-team@ test <proj>/x-agent-team
 > pnpm -r test
 
 
-> @kmh/kmh-junji@0.1.0 pretest /Volumes/machub_app/proj/x-agent-team/packages/kmh-junji
+> @kmh/kmh-junji@0.1.0 pretest <proj>/x-agent-team/packages/kmh-junji
 > pnpm build
 
 
-> @kmh/kmh-junji@0.1.0 build /Volumes/machub_app/proj/x-agent-team/packages/kmh-junji
+> @kmh/kmh-junji@0.1.0 build <proj>/x-agent-team/packages/kmh-junji
 > node build.mjs
 
 
-> @kmh/kmh-junji@0.1.0 test /Volumes/machub_app/proj/x-agent-team/packages/kmh-junji
+> @kmh/kmh-junji@0.1.0 test <proj>/x-agent-team/packages/kmh-junji
 > node --test --test-concurrency=1 test/*.test.mjs
 
 ✔ resolveMemoryFiles 落在 agent 独立目录 (0.67125ms)

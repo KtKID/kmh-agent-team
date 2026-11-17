@@ -1,17 +1,17 @@
 2026-11-11 23:46:43 +0800
-/Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+<repo>/packages/kmh-junji
 08f0650
 v25.6.1
 
-> @kmh/kmh-junji@0.1.1 pretest /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+> @kmh/kmh-junji@0.1.1 pretest <repo>/packages/kmh-junji
 > pnpm build
 
 
-> @kmh/kmh-junji@0.1.1 build /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+> @kmh/kmh-junji@0.1.1 build <repo>/packages/kmh-junji
 > node build.mjs
 
 
-> @kmh/kmh-junji@0.1.1 test /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+> @kmh/kmh-junji@0.1.1 test <repo>/packages/kmh-junji
 > node --test --test-concurrency=1 test/*.test.mjs
 
 ✔ tool_registered：工具集包含 junji_send (1.664542ms)
@@ -43,7 +43,7 @@ v25.6.1
 ℹ todo 0
 ℹ duration_ms 661.145917
 
-> @kmh/kmh-junji@0.1.1 typecheck /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+> @kmh/kmh-junji@0.1.1 typecheck <repo>/packages/kmh-junji
 > tsc -p tsconfig.host.json --noEmit && tsc -p tsconfig.browser.json --noEmit
 
 ✔ T1：删除先打断生成和清空队列，再归档并保留会话历史 (119.291875ms)

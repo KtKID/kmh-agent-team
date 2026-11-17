@@ -18,7 +18,7 @@ test at test/remove-agent.test.mjs:120:1
 
   500 !== 200
 
-      at TestContext.<anonymous> (file:///Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji/test/remove-agent.test.mjs:138:10)
+      at TestContext.<anonymous> (file://<repo>/packages/kmh-junji/test/remove-agent.test.mjs:138:10)
       at async Test.run (node:internal/test_runner/test:1125:7)
       at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
     generatedMessage: false,
@@ -32,7 +32,7 @@ test at test/remove-agent.test.mjs:120:1
 test at test/remove-agent.test.mjs:151:1
 ✖ 无效工作目录在保留档案前拒绝 (82.595458ms)
   AssertionError [ERR_ASSERTION]: Missing expected rejection.
-      at async TestContext.<anonymous> (file:///Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji/test/remove-agent.test.mjs:159:5)
+      at async TestContext.<anonymous> (file://<repo>/packages/kmh-junji/test/remove-agent.test.mjs:159:5)
       at async Test.run (node:internal/test_runner/test:1125:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:787:7) {
     generatedMessage: false,
@@ -51,7 +51,7 @@ test at test/remove-agent.test.mjs:166:1
   + undefined
   - '/private/var/folders/53/ck73s8_90tl1y6q2r43hj76m0000gn/T/junji-removal-VvPsgB/project'
 
-      at TestContext.<anonymous> (file:///Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji/test/remove-agent.test.mjs:179:10)
+      at TestContext.<anonymous> (file://<repo>/packages/kmh-junji/test/remove-agent.test.mjs:179:10)
       at async Test.run (node:internal/test_runner/test:1125:7)
       at async Test.processPendingSubtests (node:internal/test_runner/test:787:7) {
     generatedMessage: true,

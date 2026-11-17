@@ -4,8 +4,8 @@
 
 ## 仓库定位
 
-- 本仓库是独立插件仓库，最终通过 pnpm `link:` 挂进 kongming-os 的 `kmh-web` profile；不修改 DSH 上游 checkout（`/Volumes/machub_app/proj/kongming-os/third_party/dsh`，只读参照）。
-- kongming-os 仓库路径：`/Volumes/machub_app/proj/kongming-os`；DSH 插件结构模板参照 `packages/kmh-team`，记忆机制参照 `packages/kongming-memory-v1`。
+- 本仓库是独立插件仓库，最终通过 pnpm `link:` 挂进 kongming-os 的 `kmh-web` profile；不修改 DSH 上游 checkout（`<proj>/kongming-os/third_party/dsh`，只读参照）。
+- kongming-os 仓库路径：`<proj>/kongming-os`；DSH 插件结构模板参照 `packages/kmh-team`，记忆机制参照 `packages/kongming-memory-v1`。
 
 ## 关键设计
 
@@ -20,6 +20,7 @@
 - 构建：`pnpm build`（esbuild host lib + client bundle）；检查：`pnpm typecheck` / `pnpm test`（node:test）。
 - client UI 文案走 locale 字典，不硬编码。
 - 对 kongming-os / `$DSH_HOME` 的一切写入都要在对话中明确说明并获得批准（工作区外）。
+- **入库内容必须脱敏**：提交前跑 `node scripts/check-local-paths.mjs`，命中 `/Users/<名>`、`/Volumes/<名>`、`/opt/homebrew/…` 会以退出码 1 拒绝。文档、报告与 evidence 日志一律用 `<repo>` / `<proj>` / `<home>` 等占位符，不要写本机真实路径。
 
 ## 当前状态
 

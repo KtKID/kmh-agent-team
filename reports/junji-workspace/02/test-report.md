@@ -2,7 +2,7 @@
 
 - 任务：[task-workspace-path-privacy.md](../../../docs/spec/junji-workspace/tasks/task-workspace-path-privacy.md)
 - 代码基线：`bd94139`（工作区含上一任务未提交改动，边界见 [evidence/code-baseline.txt](evidence/code-baseline.txt)）
-- 环境：macOS / Node 25.6.1 / pnpm 10.30.1；仓库 `/Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji`
+- 环境：macOS / Node 25.6.1 / pnpm 10.30.1；仓库 `<repo>/packages/kmh-junji`
 - 日期：2026-11-17
 
 ## 1. 结论

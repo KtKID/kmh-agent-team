@@ -1,7 +1,7 @@
 
-> @ktkid/kmh-junji@0.1.7 typecheck /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+> @ktkid/kmh-junji@0.1.7 typecheck <repo>/packages/kmh-junji
 > node ../../scripts/link-dsh.mjs && tsc -p tsconfig.host.json --noEmit && tsc -p tsconfig.browser.json --noEmit
 
-kongming-os -> /Volumes/machub_app/proj/kongming-os
+kongming-os -> <proj>/kongming-os
 dsh peer links ok
 exit=0

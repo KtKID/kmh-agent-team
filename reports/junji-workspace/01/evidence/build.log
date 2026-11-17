@@ -1,7 +1,7 @@
 
-> @kmh/kmh-junji@0.1.3 build /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+> @kmh/kmh-junji@0.1.3 build <repo>/packages/kmh-junji
 > node ../../scripts/link-dsh.mjs && node build.mjs
 
-kongming-os -> /Volumes/machub_app/proj/kongming-os
+kongming-os -> <proj>/kongming-os
 dsh peer links ok
 EXIT=0

@@ -1,13 +1,13 @@
 
-> kmh-agent-team@ format:check /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team
+> kmh-agent-team@ format:check <repo>
 > pnpm -r format:check
 
 
-> @kmh/kmh-junji@0.1.2 format:check /Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji
+> @kmh/kmh-junji@0.1.2 format:check <repo>/packages/kmh-junji
 > prettier src tsconfig*.json package.json --check
 
 sh: prettier: command not found
-/Volumes/machub_app/proj/kmh-plugin/kmh-agent-team/packages/kmh-junji:
+<repo>/packages/kmh-junji:
  ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @kmh/kmh-junji@0.1.2 format:check: `prettier src tsconfig*.json package.json --check`
 spawn ENOENT
  ELIFECYCLE  Command failed with exit code 1.
