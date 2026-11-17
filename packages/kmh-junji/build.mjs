@@ -1,10 +1,11 @@
 /** 单次构建 Host 与 Client，保留已有产物并写入更新，供 DSH HMR 检测变化。 */
 import { build } from "esbuild";
 import { execFileSync } from "node:child_process";
-import { rm } from "node:fs/promises";
+import { readFile, rm } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 const require = createRequire(import.meta.url);
+const manifest = JSON.parse(await readFile(new URL("package.json", import.meta.url), "utf8"));
 const options = {
   absWorkingDir: fileURLToPath(new URL(".", import.meta.url)),
   entryPoints: ["src/client/index.ts"],
@@ -15,13 +16,9 @@ const options = {
   format: "cjs",
   jsx: "automatic",
   external: [
-    ...Object.keys(
-      JSON.parse(
-        await (
-          await import("node:fs/promises")
-        ).readFile(new URL("package.json", import.meta.url), "utf8"),
-      ).peerDependencies,
-    ).filter((name) => name.startsWith("@deepseek-ai/dsh-client-")),
+    ...Object.keys(manifest.peerDependencies).filter((name) =>
+      name.startsWith("@deepseek-ai/dsh-client-"),
+    ),
     "react",
     "react/jsx-runtime",
     "@deepseek-ai/cordis",
@@ -29,7 +26,7 @@ const options = {
     "@deepseek-ai/dsh-client-ui-slots",
   ],
   banner: {
-    js: 'window.__ModuleLoader__.load({id:"@kmh/kmh-junji",factory:(require)=>{var module={exports:{}};var exports=module.exports;',
+    js: `window.__ModuleLoader__.load({id:${JSON.stringify(manifest.name)},factory:(require)=>{var module={exports:{}};var exports=module.exports;`,
   },
   footer: { js: "return module.exports;}});" },
 };

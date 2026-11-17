@@ -27,7 +27,7 @@
 
 ```
 kmh-agent-team/                                ← 独立仓库（本仓库）
-  packages/kmh-junji/                          ← @kmh/kmh-junji 插件包
+  packages/kmh-junji/                          ← @ktkid/kmh-junji 插件包
     src/index.ts            host 侧入口（Cordis 插件）
     src/registry/           agent 注册表（CRUD + 持久化）
     src/shared-memory.ts    引入孔明记忆插件的 Agent 接口
@@ -115,7 +115,7 @@ $DSH_HOME/agent-team/
 ## 6. 集成与加载
 
 1. `scripts/link-dsh.mjs` 为源码构建定位 DSH、会话互通库及同级 `kmh-kongming` 的记忆插件源码。构建和类型检查会运行该脚本。默认使用 kongming-os 同级 `kmh-plugin/kmh-session-kit` 的构建产物，可用 `SESSION_KIT_DIR` 指定已构建的库，用 `KONGMING_OS_DIR` 指定宿主工作树。
-2. kongming-os 的 `kmh-web` profile 从子模块加载 `@kmh/kmh-junji`，实例由包内 `cordis.patch.yml` 登记。独立发行包内置由共享源码生成的记忆产物，DSH 依赖由宿主提供。
+2. kongming-os 的 `kmh-web` profile 从子模块加载 `@ktkid/kmh-junji`，实例由包内 `cordis.patch.yml` 登记。独立发行包内置由共享源码生成的记忆产物，DSH 依赖由宿主提供。
 
 ## 7. 分期计划
 

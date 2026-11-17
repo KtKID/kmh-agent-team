@@ -1,4 +1,4 @@
-# @kmh/kmh-junji · 军机阁
+# @ktkid/kmh-junji · 军机阁
 
 基于 DeepSeek Harness（DSH）的军机阁插件：用户创建多个「大臣」agent，每个 agent 一对一永久绑定一个专属 session，拥有独立记忆小本子，侧边栏「军机阁」区块统一管理。
 
@@ -34,8 +34,8 @@
 
 以 kongming-os 的 `kmh-web` profile 为例（其他 DSH host 同理）：
 
-1. profile 的 `package.json` dependencies 加本包（如 `"@kmh/kmh-junji": "link:…/packages/kmh-junji"`，或将来直接用 registry 版本号）；
-2. `dsh.profile.bundles` 加包名 `@kmh/kmh-junji`——client 注入面与 bundle 补丁（`cordis.patch.yml`）由包内 `dsh` 配置自带；
+1. profile 的 `package.json` dependencies 加本包（如 `"@ktkid/kmh-junji": "link:…/packages/kmh-junji"`，也可指定 npm 版本号）；
+2. `dsh.profile.bundles` 加包名 `@ktkid/kmh-junji`——client 注入面与 bundle 补丁（`cordis.patch.yml`）由包内 `dsh` 配置自带；
 3. 重建 profile（pnpm install + 重启 GUI）。
 
 同侪依赖由宿主提供：`@deepseek-ai/cordis@4.0.6-alpha.1`、`@deepseek-ai/dsh-*@0.2.2-alpha.2`、`react@^18.3.1`（见 peerDependencies）。

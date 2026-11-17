@@ -8,6 +8,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
+import { validateReleaseName } from "./validate-release-name.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const plugin = join(root, "packages/kmh-junji");
@@ -19,6 +20,7 @@ const officialDshVersion = "0.2.2-rc.2";
 
 try {
   const manifest = JSON.parse(await readFile(join(plugin, "package.json"), "utf8"));
+  await validateReleaseName(plugin, manifest);
   // 发行清单采用已验证的官方宿主版本，KMH 源码开发仍沿用原清单。
   const { scripts, devDependencies, ...release } = manifest;
   release.engines = { dsh: officialDshVersion };

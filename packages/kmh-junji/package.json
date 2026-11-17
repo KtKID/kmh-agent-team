@@ -1,6 +1,6 @@
 {
-  "name": "@kmh/kmh-junji",
-  "version": "0.1.3",
+  "name": "@ktkid/kmh-junji",
+  "version": "0.1.7",
   "type": "module",
   "description": "军机阁：用户自建 agent 团队（每个 agent 一对一专属会话 + 独立记忆小本子）",
   "license": "MIT",

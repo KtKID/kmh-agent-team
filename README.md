@@ -43,7 +43,7 @@ https://github.com/KtKID/kmh-agent-team/releases/latest/download/kmh-junji.tgz
 
 ## 从源码开发
 
-军机阁包名为 `@kmh/kmh-junji`。开发使用 Node.js 24.9+ 和 pnpm，需要本地 `kongming-os`（已初始化并构建 DSH）以及相邻的 `kmh-session-kit` 和 `kmh-kongming` 工作树。军机阁从孔明记忆插件源码构建自己的发布产物。先在 `kmh-session-kit` 安装依赖并运行 `pnpm build`，再在本仓库运行：
+军机阁包名为 `@ktkid/kmh-junji`。开发使用 Node.js 24.9+ 和 pnpm，需要本地 `kongming-os`（已初始化并构建 DSH）以及相邻的 `kmh-session-kit` 和 `kmh-kongming` 工作树。军机阁从孔明记忆插件源码构建自己的发布产物。先在 `kmh-session-kit` 安装依赖并运行 `pnpm build`，再在本仓库运行：
 
 ```sh
 pnpm install
@@ -52,7 +52,9 @@ pnpm test
 node scripts/pack-release.mjs
 ```
 
-`pnpm test` 会先构建军机阁。打包命令生成 `dist/kmh-junji.tgz`，包含预编译的宿主模块、浏览器模块和插件配置。可将文件的绝对路径填入 Harness 的「添加插件」进行本地验证。
+`pnpm test` 会先构建军机阁。源码清单、profile 的本地链接与 npm 安装使用同一个包名。打包前校验清单、`cordis.patch.yml` 的插件名和浏览器产物的模块 ID。校验失败时，核对补丁登记名并运行 `pnpm build` 后重新打包。
+
+打包命令生成 `dist/kmh-junji.tgz`，包含预编译的宿主模块、浏览器模块和插件配置。可将文件的绝对路径填入 Harness 的「添加插件」进行本地验证。
 
 开发配置和孔明工具见 [包文档](packages/kmh-junji/README.md)，本地 KMH 接入见 [技术设计](docs/tech-design.md#6-集成与加载)。问题反馈请提交到 [GitHub Issues](https://github.com/KtKID/kmh-agent-team/issues)。
 
