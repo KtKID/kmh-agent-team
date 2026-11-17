@@ -6,6 +6,7 @@ import { JunjiRuntime } from "./runtime.ts";
 import { mountWeb } from "./web.ts";
 import { Config as MemoryConfig } from "./shared-memory.ts";
 import { mountKongmingTools } from "./kongming-integration.ts";
+import { ensureWorkspaceDoc } from "./workspace.ts";
 
 export const name = "kmh-junji";
 /** 会话创建/恢复、提示词装配、workspace 挂载与 Web 路由所需的生产服务。 */
@@ -37,6 +38,13 @@ export { JunjiRuntime } from "./runtime.ts";
  */
 export async function apply(ctx: Context, config: Config): Promise<void> {
   const root = junjiRoot();
+  try {
+    const status = await ensureWorkspaceDoc(root);
+    if (status === "created")
+      ctx.logger.info(`军机阁工作区已初始化项目地图：${root}/AGENTS.md`);
+  } catch (error) {
+    ctx.logger.warn(`军机阁工作区地图初始化失败 ${root}：${String(error)}`);
+  }
   const runtime = new JunjiRuntime(ctx, new AgentStore(root), root, config);
   try {
     await runtime.restore();

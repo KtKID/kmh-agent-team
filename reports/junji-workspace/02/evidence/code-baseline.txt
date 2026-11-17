@@ -1,0 +1,11 @@
+ M CHANGELOG.md
+ M docs/tech-design.md
+ M packages/kmh-junji/src/index.ts
+ M packages/kmh-junji/src/prompt.ts
+ M packages/kmh-junji/src/runtime.ts
+?? docs/spec/
+?? packages/kmh-junji/src/workspace.ts
+?? packages/kmh-junji/test/workspace.test.mjs
+?? reports/junji-workspace/
+--- 基线 ---
+bd94139 fix(junji): 统一插件包名并修复客户端模块注册

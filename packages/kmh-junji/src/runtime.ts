@@ -9,6 +9,7 @@ import type { Config as MemoryConfig } from "./index.ts";
 import { resolveAgentCwd } from "./paths.ts";
 import { AgentStore } from "./registry.ts";
 import { mountAgentPrompt } from "./prompt.ts";
+import { readWorkspaceLinksSync, renderWorkspaceConvention } from "./workspace.ts";
 import {
   createAgentMemoryService,
   resolveDirectoryMemoryFiles,
@@ -153,7 +154,11 @@ export class JunjiRuntime {
         this.prompts.get(next.sessionId)?.();
         this.prompts.set(
           next.sessionId,
-          mountAgentPrompt(live, patch.systemPrompt),
+          mountAgentPrompt(
+            live,
+            patch.systemPrompt,
+            this.workspaceConvention(),
+          ),
         );
       }
     }
@@ -290,12 +295,32 @@ export class JunjiRuntime {
     if (previous !== undefined && previous !== agent)
       this.releasePrompt(agent.id);
     this.liveAgents.set(record.sessionId, agent);
-    if (!this.prompts.has(record.sessionId))
+    if (!this.prompts.has(record.sessionId)) {
       this.prompts.set(
         record.sessionId,
-        mountAgentPrompt(agent, record.systemPrompt),
+        mountAgentPrompt(
+          agent,
+          record.systemPrompt,
+          this.workspaceConvention(),
+        ),
       );
+    }
     await this.bindMemory(record, agent);
+  }
+
+  /**
+   * 工作区约定正文：现场扫描工作区里的软连接；读取失败时退化为「暂无项目」。
+   * 同步读取是为了在注册 persona 段之前不插入 await——同一会话并发绑定会重复注册同名段。
+   */
+  private workspaceConvention(): string {
+    try {
+      return renderWorkspaceConvention(readWorkspaceLinksSync(this.root));
+    } catch (error: unknown) {
+      this.ctx.logger.warn(
+        `军机阁读取工作区软连接失败 ${this.root}：${String(error)}`,
+      );
+      return renderWorkspaceConvention([]);
+    }
   }
 
   /** 记忆绑定：创建或复用该 agent 的记忆服务，初始化文件（创建时加载）并挂全部监听。 */

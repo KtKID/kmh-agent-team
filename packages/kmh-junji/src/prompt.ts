@@ -7,16 +7,22 @@ import { PERSONA_PREFIX_SECTION } from "@deepseek-ai/dsh-system-prompt";
  * 其余段落（运行时上下文、工具说明等）保持不变。
  * @param agent - agent 的真实 Agent 运行时。
  * @param systemPrompt - 创建面板填写的系统提示词。
+ * @param suffix - 追加在人格正文之后的工作区约定；空串或省略时不追加。
  * @returns 幂等清理入口；卸载或换提示词时调用。
  */
 export function mountAgentPrompt(
   agent: Agent,
   systemPrompt: string,
+  suffix?: string,
 ): () => void {
+  const text =
+    suffix === undefined || suffix.trim() === ""
+      ? systemPrompt
+      : `${systemPrompt}\n\n${suffix}`;
   const release = agent.ctx.systemPrompt.section({
     name: PERSONA_PREFIX_SECTION,
     order: agent.ctx.systemPrompt.getSectionOrder("DEPLOYMENT_PERSONA_PREFIX"),
-    text: systemPrompt,
+    text,
     interpolate: false,
   });
   let active = true;
